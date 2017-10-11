@@ -1,2 +1,2 @@
-# LaneDetection
+# LaneDet
 Lane Detection Program.
