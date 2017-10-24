@@ -5,7 +5,7 @@ from PIL import Image
 cwd = os.getcwd()
 
 
-def generate_tfrecords(all_cells_dir, generated_records_name):
+def _generate_tfrecords(all_cells_dir, generated_records_name):
     """
     生成 tfrecords 文件, 执行该文件之前, 请先将每个图片的 所有的正样本cell 从all_cells文件夹 移动到 该图片对应的positive_cells文件夹中
     :param all_cells_dir: 由generate_subimgs.py生成的所有图片的cell所在的文件夹
@@ -35,4 +35,9 @@ def generate_tfrecords(all_cells_dir, generated_records_name):
     writer.close()
 
 
-generate_tfrecords(all_cells_dir="emg_cells", generated_records_name="ld_train.tfrecords")
+def main(unused):
+    _generate_tfrecords(all_cells_dir="emg_cells", generated_records_name="ld_train.tfrecords")
+
+
+if __name__ == '__main__':
+    tf.app.run()
