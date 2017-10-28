@@ -7,11 +7,11 @@ cwd = os.getcwd()
 
 def create_tfrecords(isTrain):
     if isTrain:
-      classes = ["train_dog","train_cat"]
-      records_name = "dog_cat_299_299_train.tfrecords"
+        classes = ["train_dog", "train_cat"]
+        records_name = "dog_cat_299_299_train.tfrecords"
     else:
-      classes=["eval_dog","eval_cat"]
-      records_name = "dog_cat_299_299_eval.tfrecords"
+        classes = ["eval_dog", "eval_cat"]
+        records_name = "dog_cat_299_299_eval.tfrecords"
 
     writer = tf.python_io.TFRecordWriter(records_name)
     for index, name in enumerate(classes):
