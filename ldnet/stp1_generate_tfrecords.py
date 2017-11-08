@@ -35,7 +35,7 @@ def _generate_tfrecords(all_cells_dir, generated_records_name):
     writer.close()
 
 
-def main(unused):
+def main(_):
     _generate_tfrecords(all_cells_dir="emg_cells", generated_records_name="ld_train.tfrecords")
 
 

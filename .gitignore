@@ -1,6 +1,8 @@
 # Customize
 emg_cells/
 emgs/
+emg_cells_root_dir/
+merged_cells_dir/
 .idea/
 __pycache__/
 *.tfrecords

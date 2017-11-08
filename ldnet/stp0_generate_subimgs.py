@@ -97,7 +97,7 @@ def _generate_subimgs(data_dir, cells_dir, drawlines):
                 # img1.show()
 
 
-def main(unused):
+def main(_):
     _generate_subimgs(data_dir="emgs", cells_dir="emg_cells", drawlines=1)
     print("Imgs amount:", images_amount_counter)
 
