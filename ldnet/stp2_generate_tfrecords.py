@@ -31,8 +31,12 @@ def generate_tfrecords(labeled_merged_cells_dir, generated_records_name):
 
 
 def main(_):
-    generate_tfrecords(labeled_merged_cells_dir="dir1_merged_cells", generated_records_name="ldnet_train.tfrecords")
-    print("generated tfrecord.")
+    # 0: train, 1: validation
+    flag = 1
+    train_or_validation = ["train", "validation"]
+    generate_tfrecords(labeled_merged_cells_dir="dir1_merged_cells/" + train_or_validation[flag],
+                       generated_records_name="ldnet_" + train_or_validation[flag] + ".tfrecords")
+    print("generated " + train_or_validation[flag] + " tfrecord.")
 
 
 if __name__ == '__main__':

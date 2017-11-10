@@ -19,9 +19,10 @@ factor_left_unused = stp0_generate_subimgs.factor_left_unused  # 不使用图片
 factor_right_unused = stp0_generate_subimgs.factor_right_unused  # 不使用图片bottom的 factor_right_unused 列
 
 # Constants describing the current file.
-images_amount_counter = 54  # 图片数量计数器, 手动更改
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = (factor_for_h - factor_top_unused - factor_bottom_unused) \
-                                   * (factor_for_w - factor_left_unused - factor_right_unused) * images_amount_counter
+images_size = [32, 32, 3]
+images_amount_counter = {"train": 48, "validation": 6}  # 图片数量计数器, 手动更改
+NUM_EXAMPLES = (factor_for_h - factor_top_unused - factor_bottom_unused) * (
+    factor_for_w - factor_left_unused - factor_right_unused)
 
 cwd = os.getcwd()
 
@@ -63,7 +64,7 @@ def _generate_image_and_label_batch(result, batch_size, min_queue_examples, shuf
     return images, tf.reshape(label_batch, [batch_size])
 
 
-def generate_batches_from_tfrecords(records_name):
+def generate_batches_from_tfrecords(records_name, train_or_validation):
     """
     Generate batches from tfrecords file.
     :param records_name: The name of tfrecords file.
@@ -76,9 +77,9 @@ def generate_batches_from_tfrecords(records_name):
         pass
 
     result = TFRecords()
-    result.height = 32
-    result.width = 32
-    result.depth = 3
+    result.height = images_size[0]
+    result.width = images_size[1]
+    result.depth = images_size[2]
 
     filenames = [os.path.join(cwd, records_name)]
     for f in filenames:
@@ -110,14 +111,15 @@ def generate_batches_from_tfrecords(records_name):
 
     # Ensure that the random shuffling has good mixing properties.
     min_fraction_of_examples_in_queue = 0.4
-    min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue)
+    num_examples_per_epoch = NUM_EXAMPLES * images_amount_counter[train_or_validation]
+    min_queue_examples = int(num_examples_per_epoch * min_fraction_of_examples_in_queue)
     print('Filling queue with %d images before starting to train. This will take a few minutes.' % min_queue_examples)
 
     return _generate_image_and_label_batch(result, FLAGS.batch_size, min_queue_examples, shuffle=True)
 
 
 def main(_):
-    images, labels = generate_batches_from_tfrecords(records_name="ldnet_train.tfrecords")
+    images, labels = generate_batches_from_tfrecords(records_name="ldnet_train.tfrecords", train_or_validation="train")
     print(images, labels)
 
 

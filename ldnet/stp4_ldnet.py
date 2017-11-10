@@ -30,7 +30,7 @@ def ldnet(inputs, num_classes=3, dropout_keep_prob=0.8, spatial_squeeze=True, sc
         mixed_3: 16 x 16 x 640 Feature extraction module
         mixed_4: 8 x 8 x 1280 Dimension reduction module
         mixed_5: 4 x 4 x 1280 Dimension reduction module
-        Final pooling and prediction
+        Final pooling and prediction -> 3
 
     :param inputs: the size of imputs is [batch_num, width, height, channel].
     :param num_classes: num of classes.
