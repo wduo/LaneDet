@@ -13,10 +13,11 @@ factor_bottom_unused = 4  # 不使用图片bottom的 factor_bottom_unused 行
 factor_left_unused = 0  # 不使用图片top的 factor_left_unused 列
 factor_right_unused = 0  # 不使用图片bottom的 factor_right_unused 列
 
+# variables using for current file.
 images_amount_counter = 0  # 图片数量计数器, 手动更改
 
 
-def _generate_subimgs(data_dir, cells_dir, drawlines):
+def generate_subimgs(data_dir, cells_dir, drawlines):
     """
     生成可直接用于制作 tfRecords 的cell
     :param data_dir: 图片文件夹所在的根目录
@@ -98,7 +99,7 @@ def _generate_subimgs(data_dir, cells_dir, drawlines):
 
 
 def main(_):
-    _generate_subimgs(data_dir="emgs", cells_dir="emg_cells", drawlines=1)
+    generate_subimgs(data_dir="dir0_initial_imgs", cells_dir="dir0_unlabeled_cells", drawlines=1)
     print("Imgs amount:", images_amount_counter)
 
 
