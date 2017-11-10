@@ -40,7 +40,7 @@ def merge_cells_of_each_classes(emg_cells_root, merged_cells):
 
 
 def main(_):
-    merge_cells_of_each_classes(emg_cells_root="emg_cells_root_dir", merged_cells="merged_cells_dir")
+    merge_cells_of_each_classes(emg_cells_root="dir1_labeled_cells", merged_cells="dir1_merged_cells")
     print("cells count: ", cells_count)
 
 

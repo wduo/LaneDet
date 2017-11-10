@@ -29,7 +29,7 @@ def create_tfrecords(isTrain):
     writer.close()
 
 
-def main(unused):
+def main(_):
     create_tfrecords(isTrain=1)
 
 

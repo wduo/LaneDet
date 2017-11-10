@@ -5,7 +5,7 @@ import stp0_generate_subimgs
 
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 128, """Number of images to process in a batch.""")
+tf.app.flags.DEFINE_integer('batch_size', 64, """Number of images to process in a batch.""")
 # tf.app.flags.DEFINE_string('data_dir', '/home/ipprdl//www/dog_cat', """Path to the data directory.""")
 # tf.app.flags.DEFINE_boolean('use_fp16', False, """Train the model using fp16.""")
 
@@ -17,9 +17,9 @@ factor_top_unused = stp0_generate_subimgs.factor_top_unused  # 不使用图片to
 factor_bottom_unused = stp0_generate_subimgs.factor_bottom_unused  # 不使用图片bottom的 factor_bottom_unused 行
 factor_left_unused = stp0_generate_subimgs.factor_left_unused  # 不使用图片top的 factor_left_unused 列
 factor_right_unused = stp0_generate_subimgs.factor_right_unused  # 不使用图片bottom的 factor_right_unused 列
-images_amount_counter = stp0_generate_subimgs.images_amount_counter  # 图片数量计数器, 手动更改
 
 # Constants describing the current file.
+images_amount_counter = 54  # 图片数量计数器, 手动更改
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = (factor_for_h - factor_top_unused - factor_bottom_unused) \
                                    * (factor_for_w - factor_left_unused - factor_right_unused) * images_amount_counter
 
@@ -116,4 +116,10 @@ def generate_batches_from_tfrecords(records_name):
     return _generate_image_and_label_batch(result, FLAGS.batch_size, min_queue_examples, shuffle=True)
 
 
-generate_batches_from_tfrecords(records_name="ld_train.tfrecords")
+def main(_):
+    images, labels = generate_batches_from_tfrecords(records_name="ldnet_train.tfrecords")
+    print(images, labels)
+
+
+if __name__ == '__main__':
+    tf.app.run()
