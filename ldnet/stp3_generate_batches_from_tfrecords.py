@@ -58,10 +58,9 @@ def _generate_image_and_label_batch(result, batch_size, min_queue_examples, shuf
             batch_size=batch_size,
             num_threads=num_preprocess_threads,
             capacity=min_queue_examples + 3 * batch_size)
-
     # print(images, label_batch)
 
-    return images, tf.reshape(label_batch, [batch_size])
+    return tf.cast(images, tf.float32), tf.reshape(label_batch, [batch_size])
 
 
 def generate_batches_from_tfrecords(records_name, train_or_validation):
@@ -113,7 +112,8 @@ def generate_batches_from_tfrecords(records_name, train_or_validation):
     min_fraction_of_examples_in_queue = 0.4
     num_examples_per_epoch = NUM_EXAMPLES * images_amount_counter[train_or_validation]
     min_queue_examples = int(num_examples_per_epoch * min_fraction_of_examples_in_queue)
-    print('Filling queue with %d images before starting to train. This will take a few minutes.' % min_queue_examples)
+    print('Filling queue with %d images before starting to %s. This will take a few minutes.' % (
+        min_queue_examples, train_or_validation))
 
     return _generate_image_and_label_batch(result, FLAGS.batch_size, min_queue_examples, shuffle=True)
 
