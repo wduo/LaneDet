@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw
 
 cwd = os.getcwd()
 
-# Global constants describing the cells data set.
+# constants describing the cells data set.
 factor_for_h = 16  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
 factor_for_w = 16  # 图片width方向上的划分因子 即列方向上划分出 factor_for_w 个 cell
 # RIO Selection. If don't select ROI, set follow four factors to 0.

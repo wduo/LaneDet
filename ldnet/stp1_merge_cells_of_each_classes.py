@@ -2,9 +2,11 @@ import os
 import shutil
 import tensorflow as tf
 
+# constants describing the cells data set.
 # All classes:      class 0,           class 1,      class 2
 list_of_classes = ["cluttered_cells", "lane_cells", "road_surface_cells"]
 
+# variables using for current file.
 cells_count = 0  # 统计复制了多少个cells
 
 

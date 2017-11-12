@@ -1,28 +1,31 @@
 import os
 import tensorflow as tf
 
-import stp0_generate_subimgs
+from stp0_generate_subimgs import factor_for_h
+from stp0_generate_subimgs import factor_for_w
+from stp0_generate_subimgs import factor_top_unused
+from stp0_generate_subimgs import factor_bottom_unused
+from stp0_generate_subimgs import factor_left_unused
+from stp0_generate_subimgs import factor_right_unused
 
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
 tf.app.flags.DEFINE_integer('batch_size', 64, """Number of images to process in a batch.""")
-# tf.app.flags.DEFINE_string('data_dir', '/home/ipprdl//www/dog_cat', """Path to the data directory.""")
-# tf.app.flags.DEFINE_boolean('use_fp16', False, """Train the model using fp16.""")
 
-# Global constants describing the cells data set.
-factor_for_h = stp0_generate_subimgs.factor_for_h  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
-factor_for_w = stp0_generate_subimgs.factor_for_w  # 图片width方向上的划分因子 即列方向上划分出 factor_for_w 个 cell
-# RIO Selection. If don't select ROI, set follow four factors to 0.
-factor_top_unused = stp0_generate_subimgs.factor_top_unused  # 不使用图片top的 factor_top_unused 行
-factor_bottom_unused = stp0_generate_subimgs.factor_bottom_unused  # 不使用图片bottom的 factor_bottom_unused 行
-factor_left_unused = stp0_generate_subimgs.factor_left_unused  # 不使用图片top的 factor_left_unused 列
-factor_right_unused = stp0_generate_subimgs.factor_right_unused  # 不使用图片bottom的 factor_right_unused 列
+# # Global constants describing the cells data set.
+# factor_for_h = stp0_generate_subimgs.factor_for_h  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
+# factor_for_w = stp0_generate_subimgs.factor_for_w  # 图片width方向上的划分因子 即列方向上划分出 factor_for_w 个 cell
+# # RIO Selection. If don't select ROI, set follow four factors to 0.
+# factor_top_unused = stp0_generate_subimgs.factor_top_unused  # 不使用图片top的 factor_top_unused 行
+# factor_bottom_unused = stp0_generate_subimgs.factor_bottom_unused  # 不使用图片bottom的 factor_bottom_unused 行
+# factor_left_unused = stp0_generate_subimgs.factor_left_unused  # 不使用图片top的 factor_left_unused 列
+# factor_right_unused = stp0_generate_subimgs.factor_right_unused  # 不使用图片bottom的 factor_right_unused 列
 
-# Constants describing the current file.
+# constants describing the current file.
 images_size = [32, 32, 3]
 images_amount_counter = {"train": 48, "validation": 6}  # 图片数量计数器, 手动更改
 NUM_EXAMPLES = (factor_for_h - factor_top_unused - factor_bottom_unused) * (
-    factor_for_w - factor_left_unused - factor_right_unused)
+    factor_for_w - factor_left_unused - factor_right_unused)  # 每张图片有多少个cells
 
 cwd = os.getcwd()
 

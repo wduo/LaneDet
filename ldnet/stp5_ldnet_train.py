@@ -1,23 +1,32 @@
 from datetime import datetime
 import os
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
+# import tensorflow.contrib.slim as slim
 
 import stp3_generate_batches_from_tfrecords
 import stp4_ldnet
 
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
-tf.app.flags.DEFINE_float('learning_rate', 0.01, """Learning rate for train.""")
+# tf.app.flags.DEFINE_float('learning_rate', 0.01, """Learning rate for train.""")
 tf.app.flags.DEFINE_integer('eval_step_interval', 10, """How often to evaluate the training results.""")
 
+# global constants.
 images_size = stp3_generate_batches_from_tfrecords.images_size
+NUM_EXAMPLES = stp3_generate_batches_from_tfrecords.NUM_EXAMPLES
+images_amount_counter = stp3_generate_batches_from_tfrecords.images_amount_counter
 
-MAX_STEPS = 2000
+# constants describing the current file.
+MAX_STEPS = 3000
 NUM_CLASS = 3
 MODEL_SAVE_PATH = "/tmp/ldnet/saved_model"
 MODEL_NAME = "ldnet_model.ckpt"
 SUMMARIES_PATH = "/tmp/ldnet/summaries"
+MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = NUM_EXAMPLES * images_amount_counter['train']
+INITIAL_LEARNING_RATE = 0.001  # Initial learning rate.
+LEARNING_RATE_DECAY_FACTOR = 0.96  # Learning rate decay factor.
+NUM_EPOCHS_PER_DECAY = 8  # Epochs after which learning rate decays.
 
 
 def add_training_ops(num_class, global_step):
@@ -44,10 +53,28 @@ def add_training_ops(num_class, global_step):
             tf.summary.scalar('cross_entropy', cross_entropy_mean)
 
     with tf.name_scope('train'):
-        optimizer = tf.train.GradientDescentOptimizer(FLAGS.learning_rate)
+        # Variables that affect learning rate.
+        num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
+        decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
+
+        # Decay the learning rate exponentially based on the number of steps.
+        lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
+                                        global_step,
+                                        decay_steps,
+                                        LEARNING_RATE_DECAY_FACTOR,
+                                        staircase=True)
+        tf.summary.scalar('learning_rate', lr)
+
+        optimizer = tf.train.GradientDescentOptimizer(lr)
         train_step = optimizer.minimize(cross_entropy_mean, global_step=global_step)
 
-    return images_placeholder, labels_placeholder, final_tensor, cross_entropy_mean, train_step
+    # Track the moving averages of all trainable variables.
+    variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
+    variables_averages_op = variable_averages.apply(tf.trainable_variables())
+    with tf.control_dependencies([train_step, variables_averages_op]):
+        train_op = tf.no_op(name='train')
+
+    return images_placeholder, labels_placeholder, final_tensor, cross_entropy_mean, train_op
 
 
 def add_evaluation_step(final_tensor, labels_placeholder):
