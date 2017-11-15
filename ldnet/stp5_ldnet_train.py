@@ -17,7 +17,7 @@ NUM_EXAMPLES = stp3_generate_batches_from_tfrecords.NUM_EXAMPLES
 images_amount_counter = stp3_generate_batches_from_tfrecords.images_amount_counter
 
 # constants describing the current file.
-MAX_STEPS = 3000
+MAX_STEPS = 5000
 NUM_CLASS = 3
 MODEL_SAVE_PATH = "/tmp/ldnet/saved_model"
 MODEL_NAME = "ldnet_model.ckpt"
@@ -26,7 +26,7 @@ MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = NUM_EXAMPLES * images_amount_counter['train']
 INITIAL_LEARNING_RATE = 0.001  # Initial learning rate.
 LEARNING_RATE_DECAY_FACTOR = 0.96  # Learning rate decay factor.
-NUM_EPOCHS_PER_DECAY = 8  # Epochs after which learning rate decays.
+NUM_EPOCHS_PER_DECAY = 32  # Epochs after which learning rate decays.
 
 
 def add_training_ops(num_class, global_step):
@@ -50,7 +50,16 @@ def add_training_ops(num_class, global_step):
                                                                 labels=tf.one_hot(labels_placeholder, num_class))
         with tf.name_scope('total'):
             cross_entropy_mean = tf.reduce_mean(cross_entropy)
-            tf.summary.scalar('cross_entropy', cross_entropy_mean)
+            # tf.summary.scalar('cross_entropy', cross_entropy_mean)
+            tf.add_to_collection('losses', cross_entropy_mean)
+            total_loss = tf.add_n(tf.get_collection('losses'), name='total_loss')
+            tf.summary.scalar('total_loss', total_loss)
+
+    with tf.name_scope('loss_averages'):
+        # Compute the moving average of all individual losses and the total loss.
+        loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
+        losses = tf.get_collection('losses')
+        loss_averages_op = loss_averages.apply(losses + [total_loss])
 
     with tf.name_scope('train'):
         # Variables that affect learning rate.
@@ -65,8 +74,9 @@ def add_training_ops(num_class, global_step):
                                         staircase=True)
         tf.summary.scalar('learning_rate', lr)
 
-        optimizer = tf.train.GradientDescentOptimizer(lr)
-        train_step = optimizer.minimize(cross_entropy_mean, global_step=global_step)
+        with tf.control_dependencies([loss_averages_op]):
+            optimizer = tf.train.GradientDescentOptimizer(lr)
+            train_step = optimizer.minimize(total_loss, global_step=global_step)
 
     # Track the moving averages of all trainable variables.
     variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
@@ -74,7 +84,7 @@ def add_training_ops(num_class, global_step):
     with tf.control_dependencies([train_step, variables_averages_op]):
         train_op = tf.no_op(name='train')
 
-    return images_placeholder, labels_placeholder, final_tensor, cross_entropy_mean, train_op
+    return images_placeholder, labels_placeholder, final_tensor, total_loss, train_op
 
 
 def add_evaluation_step(final_tensor, labels_placeholder):

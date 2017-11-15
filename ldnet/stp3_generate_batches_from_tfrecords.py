@@ -10,7 +10,7 @@ from stp0_generate_subimgs import factor_right_unused
 
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 64, """Number of images to process in a batch.""")
+tf.app.flags.DEFINE_integer('batch_size', 128, """Number of images to process in a batch.""")
 
 # # Global constants describing the cells data set.
 # factor_for_h = stp0_generate_subimgs.factor_for_h  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
@@ -23,7 +23,7 @@ tf.app.flags.DEFINE_integer('batch_size', 64, """Number of images to process in 
 
 # constants describing the current file.
 images_size = [32, 32, 3]
-images_amount_counter = {"train": 48, "validation": 6}  # 图片数量计数器, 手动更改
+images_amount_counter = {"train": 80, "validation": 10}  # 图片数量计数器, 手动更改
 NUM_EXAMPLES = (factor_for_h - factor_top_unused - factor_bottom_unused) * (
     factor_for_w - factor_left_unused - factor_right_unused)  # 每张图片有多少个cells
 
