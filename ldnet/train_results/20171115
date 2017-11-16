@@ -1,3 +1,9 @@
+--------------------------------------------------------------------------
+          cluttereds:lanes:road sufaces
+样本数量比：2       :   1   :    1
+
+--------------------------------------------------------------------------
+
 /usr/bin/python3.5 /home/ipprdl/www/LaneDet/ldnet/stp5_ldnet_train.py
 2017-11-15 22:15:34.079878: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:892] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
 2017-11-15 22:15:34.080141: I tensorflow/core/common_runtime/gpu/gpu_device.cc:962] Found device 0 with properties: 
