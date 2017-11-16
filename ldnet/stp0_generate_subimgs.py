@@ -8,7 +8,7 @@ cwd = os.getcwd()
 factor_for_h = 16  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
 factor_for_w = 16  # 图片width方向上的划分因子 即列方向上划分出 factor_for_w 个 cell
 # RIO Selection. If don't select ROI, set follow four factors to 0.
-factor_top_unused = 4  # 不使用图片top的 factor_top_unused 行
+factor_top_unused = 6  # 不使用图片top的 factor_top_unused 行
 factor_bottom_unused = 4  # 不使用图片bottom的 factor_bottom_unused 行
 factor_left_unused = 0  # 不使用图片top的 factor_left_unused 列
 factor_right_unused = 0  # 不使用图片bottom的 factor_right_unused 列
