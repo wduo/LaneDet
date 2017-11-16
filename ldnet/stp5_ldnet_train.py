@@ -12,7 +12,7 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('eval_step_interval', 10, """How often to evaluate the training results.""")
 
 # global constants.
-images_size = stp3_generate_batches_from_tfrecords.images_size
+images_size = stp3_generate_batches_from_tfrecords.distorted_image_size
 NUM_EXAMPLES = stp3_generate_batches_from_tfrecords.NUM_EXAMPLES
 images_amount_counter = stp3_generate_batches_from_tfrecords.images_amount_counter
 

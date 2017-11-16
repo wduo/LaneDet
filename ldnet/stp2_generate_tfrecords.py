@@ -20,7 +20,8 @@ def generate_tfrecords(labeled_merged_cells_dir, generated_records_name):
         for cell_name in os.listdir(class_path):
             cell_path = class_path + "/" + cell_name
             cell = Image.open(cell_path)
-            cell = cell.resize((32, 32))
+            # the initial [height, width] of cells is [30, 40].
+            cell = cell.resize((34, 34))
             cell_raw = cell.tobytes()
             example = tf.train.Example(features=tf.train.Features(feature={
                 "label": tf.train.Feature(int64_list=tf.train.Int64List(value=[class_index])),
