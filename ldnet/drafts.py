@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 print(str(99))
 
 factor_for_h = 24  # 图片height方向上的划分因子
@@ -18,3 +20,5 @@ draw.text([0, 0], "0_0", "red")
 draw.rectangle((40, 0, 80, 20), outline="green")
 draw.text([40, 0], "0_1", "red")
 im01.show()
+
+re = tf.contrib.layers.l2_regularizer(0.0001)
