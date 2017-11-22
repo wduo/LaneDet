@@ -43,7 +43,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
     return var
 
 
-def ldnet(inputs, num_classes=3, dropout_keep_prob=0.8, spatial_squeeze=True, scope="ldnet",
+def ldnet(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True, scope="ldnet",
           print_current_tensor=False):
     """
     ldnet architecture:
@@ -175,35 +175,35 @@ def ldnet(inputs, num_classes=3, dropout_keep_prob=0.8, spatial_squeeze=True, sc
                 net = array_ops.concat([branch_0, branch_1, branch_2], 3)
                 if print_current_tensor: print(net)
 
-            # # mixed_3: 16 x 16 x 640 Feature extraction module
-            # with variable_scope.variable_scope("mixed_3"):
-            #     with variable_scope.variable_scope('Branch_0'):
-            #         branch_0 = layers.conv2d(
-            #             net, 96, [1, 1], scope='Conv2d_0a_1x1')
-            #         branch_0 = layers.conv2d(
-            #             branch_0, 128, [3, 3], scope='Conv2d_0b_3x3')
-            #
-            #     with variable_scope.variable_scope('Branch_1'):
-            #         branch_1 = layers.conv2d(
-            #             net, 96, [1, 1], scope='Conv2d_0a_1x1')
-            #         branch_1 = layers.conv2d(
-            #             branch_1, 128, [5, 5], scope='Conv2d_0b_5x5')
-            #         branch_1 = layers.conv2d(
-            #             branch_1, 192, [5, 5], scope='Conv2d_0c_5x5')
-            #
-            #     with variable_scope.variable_scope('Branch_2'):
-            #         branch_2 = layers.conv2d(
-            #             net, 96, [1, 1], scope='Conv2d_0a_1x1')
-            #         branch_2 = layers.conv2d(
-            #             branch_2, 128, [7, 7], scope='Conv2d_0b_7x7')
-            #
-            #     with variable_scope.variable_scope('Branch_3'):
-            #         branch_3 = layers_lib.avg_pool2d(net, [5, 5], scope='AvgPool_0a_5x5')
-            #         branch_3 = layers.conv2d(
-            #             branch_3, 192, [1, 1], scope='Conv2d_0b_1x1')
-            #
-            #     net = array_ops.concat([branch_0, branch_1, branch_2, branch_3], 3)
-            #     if print_current_tensor: print(net)
+            # mixed_3: 16 x 16 x 640 Feature extraction module
+            with variable_scope.variable_scope("mixed_3"):
+                with variable_scope.variable_scope('Branch_0'):
+                    branch_0 = layers.conv2d(
+                        net, 96, [1, 1], scope='Conv2d_0a_1x1')
+                    branch_0 = layers.conv2d(
+                        branch_0, 128, [3, 3], scope='Conv2d_0b_3x3')
+
+                with variable_scope.variable_scope('Branch_1'):
+                    branch_1 = layers.conv2d(
+                        net, 96, [1, 1], scope='Conv2d_0a_1x1')
+                    branch_1 = layers.conv2d(
+                        branch_1, 128, [5, 5], scope='Conv2d_0b_5x5')
+                    branch_1 = layers.conv2d(
+                        branch_1, 192, [5, 5], scope='Conv2d_0c_5x5')
+
+                with variable_scope.variable_scope('Branch_2'):
+                    branch_2 = layers.conv2d(
+                        net, 96, [1, 1], scope='Conv2d_0a_1x1')
+                    branch_2 = layers.conv2d(
+                        branch_2, 128, [7, 7], scope='Conv2d_0b_7x7')
+
+                with variable_scope.variable_scope('Branch_3'):
+                    branch_3 = layers_lib.avg_pool2d(net, [5, 5], scope='AvgPool_0a_5x5')
+                    branch_3 = layers.conv2d(
+                        branch_3, 192, [1, 1], scope='Conv2d_0b_1x1')
+
+                net = array_ops.concat([branch_0, branch_1, branch_2, branch_3], 3)
+                if print_current_tensor: print(net)
 
             # mixed_4: 8 x 8 x 1280 Dimension reduction module
             with variable_scope.variable_scope("mixed_4"):
@@ -276,7 +276,7 @@ def ldnet(inputs, num_classes=3, dropout_keep_prob=0.8, spatial_squeeze=True, sc
                     # Move everything into depth so we can perform a single matrix multiply.
                     reshape = tf.reshape(net, [-1, 1280])
                     weights = _variable_with_weight_decay('weights', shape=[1280, 640],
-                                                          stddev=0.04, wd=0.004)
+                                                          stddev=0.04, wd=0.0001)
                     biases = _variable_on_cpu('biases', [640], tf.constant_initializer(0.1))
                     net = tf.nn.relu(tf.matmul(reshape, weights) + biases, name=scope.name)
                 # 1 x 1 x 640
@@ -287,7 +287,7 @@ def ldnet(inputs, num_classes=3, dropout_keep_prob=0.8, spatial_squeeze=True, sc
                 # local2
                 with variable_scope.variable_scope('local2') as scope:
                     weights = _variable_with_weight_decay('weights', shape=[640, 320],
-                                                          stddev=0.04, wd=0.004)
+                                                          stddev=0.04, wd=0.0001)
                     biases = _variable_on_cpu('biases', [320], tf.constant_initializer(0.1))
                     net = tf.nn.relu(tf.matmul(net, weights) + biases, name=scope.name)
                 # 1 x 1 x 320
