@@ -6,3 +6,4 @@ dir0_unlabeled_cells/
 dir1_labeled_cells/
 dir1_merged_cells/
 *.tfrecords
+*.png
