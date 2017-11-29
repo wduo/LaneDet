@@ -24,11 +24,23 @@ im01 = Image.open("dir6_initial_imgs/f00060.png")
 #
 # re = tf.contrib.layers.l2_regularizer(0.0001)
 
-im01 = np.array(im01)
-print(im01.shape)
+# im01 = np.array(im01)
+# print(im01.shape)
+#
+# cell = im01[0:100, 40:200]
+# print(cell.shape)
+#
+# for i in range(4, 6):
+#     print(i)
 
-cell = im01[0:100, 40:200]
-print(cell.shape)
+# im01.convert('RGB')
 
-for i in range(4, 6):
-    print(i)
+im2 = Image.new("RGB", (640, 480))
+draw = ImageDraw.Draw(im2)
+draw.rectangle(xy=(10, 100, 50, 200), fill=(0, 255, 0))
+draw.rectangle(xy=(60, 100, 100, 200), fill=(0, 255, 0))
+
+# merge two images using blend
+blend = Image.blend(im01, im2, 0.25)
+
+blend.show()
