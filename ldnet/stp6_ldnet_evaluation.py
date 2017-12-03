@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from stp0_generate_subimgs import factor_for_h
 from stp0_generate_subimgs import factor_for_w
@@ -52,11 +52,23 @@ def read_images_as_cells_batch(images_path):
             cell = tf.image.resize_images(cell, (images_size[0], images_size[1]))
             cells_batch_of_one_image.append(cell)
 
+    # print(cells_batch_of_one_image)
     cells_batch_of_one_image = tf.reshape(cells_batch_of_one_image,
                                           [-1, images_size[0], images_size[1], images_size[2]])
-    # print(cells_batch_of_one_image)
+    print(cells_batch_of_one_image)
     # print(cells_batch_of_one_image.dtype)
     # print(cells_batch_of_one_image.shape)
+
+    # ---------- test start ------------------------------
+    # img = Image.fromarray(array_image)
+    # img.show()
+
+    # have problems in this code snippet.
+    # for ii in range(batch_num):
+    #     img = Image.fromarray(int(cells_batch_of_one_image[ii]))
+    #     img.show()
+
+    # ---------- test end --------------------------------
 
     if cells_batch_of_one_image.shape[0] != batch_num:
         print('batch_size and batch_num inconsistent.')
@@ -111,27 +123,47 @@ def evaluate(num_class, images_placeholder_tensor):
 
 
 def show_lane(initial_image, final_tensor_value):
-    print('flourish')
-    # print(final_tensor_value)
-    # print(final_tensor_value.shape)
+    # print('flourish')
 
     # show initial image.
-    initial_image.show()
+    # initial_image.show()
 
     position = 0  # lane's position
-    lane_counter = 0  # lane's number.
-
+    target_cells_counter = 0  # lane's number.
+    global_position = []
     for cell_prediction in final_tensor_value:
         position += 1
-        if cell_prediction[1] >= 0.75:
-            lane_counter += 1
-            # print(cell_prediction)
-            print(position)
-    print(lane_counter)
+        if (cell_prediction[1] >= 0.5) and (cell_prediction[2] < 0.5):
+            target_cells_counter += 1
+            global_position.append(position + factor_for_w * factor_top_unused)
+    print('global_position', global_position)
+    print('target_cells_counter', target_cells_counter)
+
+    # the cells' global xy positions.
+    global_row = [x // factor_for_w for x in global_position]
+    global_column = [x % factor_for_w for x in global_position]
+    print('global_row', global_row)
+    print('global_column', global_column)
+
+    # draw target cells in mask image.
+    mask_image = Image.new("RGB", (initial_image.width, initial_image.height))
+    draw_mask = ImageDraw.Draw(mask_image)
+    cell_width = initial_image.width // factor_for_w  # the width of cells
+    cell_height = initial_image.height // factor_for_h  # the height of cells
+    for i in range(target_cells_counter):
+        x1_left_margin = cell_width * (global_column[i] - 1)
+        x1_top_margin = cell_height * (global_row[i] - 1)
+        x2_left_margin = cell_width * global_column[i]
+        x2_top_margin = cell_height * global_row[i]
+        draw_mask.rectangle(xy=(x1_left_margin, x1_top_margin, x2_left_margin, x2_top_margin), fill=(0, 255, 0))
+
+    # merge two images using blend, and show target cells in initial image.
+    lane_cells = Image.blend(initial_image, mask_image, 0.25)
+    lane_cells.show()
 
 
 def main(_):
-    initial_image, cells_batch_of_one_image = read_images_as_cells_batch("dir6_initial_imgs/f00061.png")
+    initial_image, cells_batch_of_one_image = read_images_as_cells_batch("dir6_initial_imgs/f00030.png")
     final_tensor_value = evaluate(num_class=NUM_CLASS, images_placeholder_tensor=cells_batch_of_one_image)
     show_lane(initial_image=initial_image, final_tensor_value=final_tensor_value)
 
