@@ -1,9 +1,9 @@
 # Customize
 .idea/
 __pycache__/
-dir0_initial_imgs/
-dir0_unlabeled_cells/
-dir1_labeled_cells/
-dir1_merged_cells/
+# dir0_initial_imgs/
+# dir0_unlabeled_cells/
+# dir1_labeled_cells/
+# dir1_merged_cells/
 *.tfrecords
 *.png
