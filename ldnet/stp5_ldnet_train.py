@@ -74,8 +74,11 @@ def add_training_ops(num_class, global_step):
                                         staircase=True)
         tf.summary.scalar('learning_rate', lr)
 
+        # with tf.control_dependencies([loss_averages_op]):
+        #     optimizer = tf.train.GradientDescentOptimizer(lr)
+        #     train_step = optimizer.minimize(total_loss, global_step=global_step)
         with tf.control_dependencies([loss_averages_op]):
-            optimizer = tf.train.GradientDescentOptimizer(lr)
+            optimizer = tf.train.AdamOptimizer(lr)
             train_step = optimizer.minimize(total_loss, global_step=global_step)
 
     # Track the moving averages of all trainable variables.
