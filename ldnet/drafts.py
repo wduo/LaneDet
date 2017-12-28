@@ -1,5 +1,10 @@
 import tensorflow as tf
 import numpy as np
+import keras.backend as K
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config)
+K.set_session(sess)
 
 # print(str(99))
 #
