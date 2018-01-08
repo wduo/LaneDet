@@ -5,6 +5,7 @@ import tensorflow as tf
 
 import stp3_generate_batches_from_tfrecords
 import stp4_ldnet
+import stp4_ldnet_v1
 
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
@@ -38,7 +39,8 @@ def add_training_ops(num_class, global_step):
         labels_placeholder = tf.placeholder(tf.int32, [None], name='LabelsPlaceholder')
 
     # the size of logits: [batch_size, 3]
-    logits = stp4_ldnet.ldnet(inputs=images_placeholder, num_classes=num_class, print_current_tensor=False)
+    # logits = stp4_ldnet.ldnet(inputs=images_placeholder, num_classes=num_class, print_current_tensor=False)
+    logits = stp4_ldnet_v1.ldnet_v1(inputs=images_placeholder, num_classes=num_class, print_current_tensor=False)
     tf.summary.histogram('pre_activations', logits)
 
     # the size of final_tensor: [batch_size, 3]
