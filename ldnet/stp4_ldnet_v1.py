@@ -1,9 +1,13 @@
 from tensorflow.contrib import layers
 from tensorflow.contrib.framework.python.ops import arg_scope
 from tensorflow.contrib.layers.python.layers import layers as layers_lib
+from tensorflow.contrib.layers.python.layers import regularizers
 from tensorflow.python.ops import variable_scope
+from tensorflow.python.framework import ops
 from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import nn_ops
+
 import tensorflow as tf
 
 
@@ -18,6 +22,7 @@ def _variable_on_cpu(name, shape, initializer):
     """
     with tf.device('/cpu:0'):
         var = tf.get_variable(name, shape, initializer=initializer, dtype=tf.float32)
+
     return var
 
 
@@ -41,7 +46,91 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
     if wd is not None:
         weight_decay = tf.multiply(tf.nn.l2_loss(var), wd, name='weight_loss')
         tf.add_to_collection('losses', weight_decay)
+
     return var
+
+
+def _feature_extraction_residual(net, first_layer_depth=48, second_layer_depth=64, last_layer_depth=96,
+                                 scope='feature_extraction_residual'):
+    """
+    Feature extraction module of ldnet-v1.
+    :param net: the net input.
+    :param first_layer_depth: first layer depth.
+    :param second_layer_depth: second layer depth.
+    :param last_layer_depth: last layer depth.
+    :param scope: optional scope.
+    :return:
+        the size of returned net: [batch_size, height, width, channel], which
+        channel = (second_layer_depth + last_layer_depth) * 2
+    """
+    with variable_scope.variable_scope(scope):
+        with variable_scope.variable_scope('Branch_0'):
+            branch_0 = layers.conv2d(
+                net, first_layer_depth, [1, 1], scope='Conv2d_0a_1x1')
+            branch_0 = layers.conv2d(
+                branch_0, second_layer_depth, [3, 3], scope='Conv2d_0b_3x3')
+
+        with variable_scope.variable_scope('Branch_1'):
+            branch_1 = layers.conv2d(
+                net, first_layer_depth, [1, 1], scope='Conv2d_0a_1x1')
+            branch_1 = layers.conv2d(
+                branch_1, second_layer_depth, [5, 5], scope='Conv2d_0b_5x5')
+            branch_1 = layers.conv2d(
+                branch_1, last_layer_depth, [5, 5], scope='Conv2d_0c_5x5')
+
+        with variable_scope.variable_scope('Branch_2'):
+            branch_2 = layers.conv2d(
+                net, first_layer_depth, [1, 1], scope='Conv2d_0a_1x1')
+            branch_2 = layers.conv2d(
+                branch_2, second_layer_depth, [7, 7], scope='Conv2d_0b_7x7')
+
+        with variable_scope.variable_scope('Branch_3'):
+            branch_3 = layers_lib.avg_pool2d(net, [5, 5], scope='AvgPool_0a_5x5')
+            branch_3 = layers.conv2d(
+                branch_3, last_layer_depth, [1, 1], scope='Conv2d_0b_1x1')
+
+        net = array_ops.concat([branch_0, branch_1, branch_2, branch_3], 3)
+
+    return net
+
+
+def _dimension_reduction_residual(net, branch_0_depth=224, branch_1_depth=96, scope='dimension_reduction_residual'):
+    """
+    Dimension reduction module of ldnet-v1.
+    :param net: the net input.
+    :param branch_0_depth: the depth of branch_0.
+    :param branch_1_depth: the depth of branch_1.
+    :param scope: optional scope.
+    :return:
+        the size of returned net: [batch_size, height, width, channel], which
+        channel = (branch_0_depth + branch_1_depth) + last_net_depth
+    """
+    with variable_scope.variable_scope(scope):
+        with variable_scope.variable_scope('Branch_0'):
+            branch_0 = layers.conv2d(
+                net,
+                branch_0_depth, [3, 3],
+                stride=2,
+                scope='Conv2d_1a_1x1')
+
+        with variable_scope.variable_scope('Branch_1'):
+            branch_1 = layers.conv2d(
+                net, 64, [3, 3], scope='Conv2d_0a_1x1')
+            branch_1 = layers.conv2d(
+                branch_1, 96, [3, 3], scope='Conv2d_0b_3x3')
+            branch_1 = layers.conv2d(
+                branch_1,
+                branch_1_depth, [1, 1],
+                stride=2,
+                scope='Conv2d_1a_1x1')
+
+        with variable_scope.variable_scope('Branch_2'):
+            branch_2 = layers_lib.max_pool2d(
+                net, [3, 3], stride=2, scope='MaxPool_1a_3x3')
+
+        net = array_ops.concat([branch_0, branch_1, branch_2], 3)
+
+    return net
 
 
 def _prev_net_linear_projection(net_shape, prev_net, scope='linear_projection'):
@@ -64,12 +153,23 @@ def _prev_net_linear_projection(net_shape, prev_net, scope='linear_projection'):
     """
     prev_net_projection = prev_net
 
-    if net_shape != tf.shape(prev_net):
-        out_stride = tf.shape(prev_net)[1] // net_shape[1]
-        prev_net_projection = layers.conv2d(prev_net, net_shape[3], [1, 1], stride=out_stride, activation_fn=None,
-                                            scope=scope)
+    if net_shape != prev_net.shape:
+        out_stride = int(prev_net.shape[1]) // int(net_shape[1])
+        prev_net_projection = layers.conv2d(prev_net, int(net_shape[3]), [1, 1], stride=out_stride,
+                                            activation_fn=None, scope=scope)
 
     return prev_net_projection
+
+
+def _shortcuts_addition(net_shape, prev_net, prev_prev_net, scope="shortcuts_addition"):
+    with variable_scope.variable_scope(scope):
+        prev_net_linear = _prev_net_linear_projection(net_shape, prev_net, scope='prev_net_linear_projection')
+        prev_prev_net_linear = _prev_net_linear_projection(net_shape, prev_prev_net,
+                                                           scope='prev_prev_net_linear_projection')
+
+        print(prev_net_linear + prev_prev_net_linear)
+    return prev_net_linear + prev_prev_net_linear
+    # return prev_net_linear
 
 
 def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True, scope="ldnet",
@@ -93,10 +193,11 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
 
         ldnet blocks:
         mixed_1: 32 x 32 x 320 Feature extraction module
-        mixed_2: 16 x 16 x 640 Dimension reduction module
-        mixed_3: 16 x 16 x 640 Feature extraction module
-        mixed_4: 8 x 8 x 1280 Dimension reduction module
-        mixed_5: 4 x 4 x 1280 Dimension reduction module
+        mixed_2: 32 x 32 x 320 Feature extraction module
+        mixed_3: 16 x 16 x 640 Dimension reduction module
+        mixed_4: 16 x 16 x 640 Feature extraction module
+        mixed_5: 8 x 8 x 1280 Dimension reduction module
+        mixed_6: 8 x 8 x 1280 Feature extraction module
         Final pooling and prediction -> 3
 
     :param inputs: the size of imputs is [batch_num, width, height, channel].
@@ -107,11 +208,11 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
     :param print_current_tensor: whether or not print current tenser shape, name and type.
 
     :return:
-        logits: [batch, num_classes]
+        logits: [batch_size, num_classes]
     """
 
-    # end_points will collect relevant activations for external use, for example
-    # summaries or losses.
+    # end_points will collect relevant activations for the computation
+    # of shortcuts.
     end_points = []
 
     with variable_scope.variable_scope(scope, "ldnet_v1", [inputs]):
@@ -122,33 +223,36 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
                 padding='SAME'):
             # input: 32 * 32 * 3
 
-            net = layers.conv2d(inputs, 32, scope="conv0")
+            end_point = "conv0"
+            net = layers.conv2d(inputs, 32, scope=end_point)
             if print_current_tensor: print(net)
             # --> 32 * 32 * 32
 
-            net = layers.conv2d(net, 32, scope="conv1")
+            end_point = "conv1"
+            net = layers.conv2d(net, 32, scope=end_point)
             if print_current_tensor: print(net)
             # --> 32 * 32 * 32
 
-            net = layers.conv2d(net, 64, scope="conv2")
+            end_point = "conv2"
+            net = layers.conv2d(net, 64, scope=end_point)
             if print_current_tensor: print(net)
             # --> 32 * 32 * 64
 
-            net = layers_lib.max_pool2d(net, kernel_size=[2, 2], scope="maxpool0")
+            end_point = "maxpool0"
+            net = layers_lib.max_pool2d(net, kernel_size=[2, 2], scope=end_point)
             if print_current_tensor: print(net)
             # --> 32 * 32 * 64
 
             end_point = 'conv3'
             net = layers.conv2d(net, 192, scope=end_point)
             if print_current_tensor: print(net)
-            net.alias = end_point
             end_points.append(net)
             # --> 32 * 32 * 192
 
             end_point = 'maxpool1'
             net = layers_lib.max_pool2d(net, kernel_size=[2, 2], scope=end_point)
             if print_current_tensor: print(net)
-            net.alias = end_point
+            # net.alias = end_point
             end_points.append(net)
             # --> 32 * 32 * 192
 
@@ -158,161 +262,112 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
                 stride=1,
                 padding='SAME'):
             # mixed_1: 32 x 32 x 320 Feature extraction module
-            with variable_scope.variable_scope("mixed_1"):
+            end_point = 'mixed_1'
+            with variable_scope.variable_scope(end_point):
                 with variable_scope.variable_scope("residual"):
-                    with variable_scope.variable_scope('Branch_0'):
-                        branch_0 = layers.conv2d(
-                            net, 48, [1, 1], scope='Conv2d_0a_1x1')
-                        branch_0 = layers.conv2d(
-                            branch_0, 64, [3, 3], scope='Conv2d_0b_3x3')
-
-                    with variable_scope.variable_scope('Branch_1'):
-                        branch_1 = layers.conv2d(
-                            net, 48, [1, 1], scope='Conv2d_0a_1x1')
-                        branch_1 = layers.conv2d(
-                            branch_1, 64, [5, 5], scope='Conv2d_0b_5x5')
-                        branch_1 = layers.conv2d(
-                            branch_1, 96, [5, 5], scope='Conv2d_0c_5x5')
-
-                    with variable_scope.variable_scope('Branch_2'):
-                        branch_2 = layers.conv2d(
-                            net, 48, [1, 1], scope='Conv2d_0a_1x1')
-                        branch_2 = layers.conv2d(
-                            branch_2, 64, [7, 7], scope='Conv2d_0b_7x7')
-
-                    with variable_scope.variable_scope('Branch_3'):
-                        branch_3 = layers_lib.avg_pool2d(net, [5, 5], scope='AvgPool_0a_5x5')
-                        branch_3 = layers.conv2d(
-                            branch_3, 96, [1, 1], scope='Conv2d_0b_1x1')
-
-                    net = array_ops.concat([branch_0, branch_1, branch_2, branch_3], 3)
-                    if print_current_tensor: print(net)
+                    net = _feature_extraction_residual(net, first_layer_depth=48, second_layer_depth=64,
+                                                       last_layer_depth=96, scope='feature_extraction_residual')
+                    net_linear = layers.conv2d(net, int(net.shape[3]), [1, 1], activation_fn=None,
+                                               scope='net_linear_projection')
 
                 with variable_scope.variable_scope("shortcut"):
-                    prev_net_linear = _prev_net_linear_projection(tf.shape(net), end_points[-1],
-                                                                  scope='prev_net_linear_projection')
-                    prev_prev_net_linear = _prev_net_linear_projection(tf.shape(net), end_points[-2],
-                                                                       scope='prev_prev_net_linear_projection')
+                    shortcuts = _shortcuts_addition(net.shape, end_points[-1], end_points[-2],
+                                                    scope="shortcuts_addition")
 
-                net_linear = layers.conv2d(net, tf.shape(net)[3], [1, 1], activation_fn=None,
-                                           scope='net_linear_projection')
-                net = nn_ops.relu(net_linear + prev_net_linear + prev_prev_net_linear)
+                net = nn_ops.relu(net_linear + shortcuts)
+                end_points.append(net)
+                if print_current_tensor: print(net, len(end_points))
 
-            # mixed_2: 16 x 16 x 640 Dimension reduction module
-            with variable_scope.variable_scope("mixed_2"):
-                with variable_scope.variable_scope('Branch_0'):
-                    branch_0 = layers.conv2d(
-                        net,
-                        224, [3, 3],
-                        stride=2,
-                        scope='Conv2d_1a_1x1')
+            # # mixed_2: 32 x 32 x 320 Feature extraction module
+            # end_point = 'mixed_2'
+            # with variable_scope.variable_scope(end_point):
+            #     with variable_scope.variable_scope("residual"):
+            #         net = _feature_extraction_residual(net, first_layer_depth=48, second_layer_depth=64,
+            #                                            last_layer_depth=96, scope='feature_extraction_residual')
+            #         net_linear = layers.conv2d(net, int(net.shape[3]), [1, 1], activation_fn=None,
+            #                                    scope='net_linear_projection')
+            #
+            #     with variable_scope.variable_scope("shortcut"):
+            #         shortcuts = _shortcuts_addition(net.shape, end_points[-1], end_points[-2],
+            #                                         scope="shortcuts_addition")
+            #
+            #     net = nn_ops.relu(net_linear + shortcuts)
+            #     end_points.append(net)
+            #     if print_current_tensor: print(net)
 
-                with variable_scope.variable_scope('Branch_1'):
-                    branch_1 = layers.conv2d(
-                        net, 64, [1, 1], scope='Conv2d_0a_1x1')
-                    branch_1 = layers.conv2d(
-                        branch_1, 96, [3, 3], scope='Conv2d_0b_3x3')
-                    branch_1 = layers.conv2d(
-                        branch_1,
-                        96, [3, 3],
-                        stride=2,
-                        scope='Conv2d_1a_1x1')
+            # mixed_3: 16 x 16 x 640 Dimension reduction module
+            end_point = "mixed_3"
+            with variable_scope.variable_scope(end_point):
+                with variable_scope.variable_scope("residual"):
+                    net = _dimension_reduction_residual(net, branch_0_depth=224, branch_1_depth=96,
+                                                        scope='dimension_reduction_residual')
+                    net_linear = layers.conv2d(net, int(net.shape[3]), [1, 1], activation_fn=None,
+                                               scope='net_linear_projection')
 
-                with variable_scope.variable_scope('Branch_2'):
-                    branch_2 = layers_lib.max_pool2d(
-                        net, [3, 3], stride=2, scope='MaxPool_1a_3x3')
+                with variable_scope.variable_scope("shortcut"):
+                    shortcuts = _shortcuts_addition(net.shape, end_points[-1], end_points[-2],
+                                                    scope="shortcuts_addition")
 
-                net = array_ops.concat([branch_0, branch_1, branch_2], 3)
-                if print_current_tensor: print(net)
+                net = nn_ops.relu(net_linear + shortcuts)
+                end_points.append(net)
+                if print_current_tensor: print(net, len(end_points))
 
-            # mixed_3: 16 x 16 x 640 Feature extraction module
-            with variable_scope.variable_scope("mixed_3"):
-                with variable_scope.variable_scope('Branch_0'):
-                    branch_0 = layers.conv2d(
-                        net, 96, [1, 1], scope='Conv2d_0a_1x1')
-                    branch_0 = layers.conv2d(
-                        branch_0, 128, [3, 3], scope='Conv2d_0b_3x3')
+            # mixed_4: 16 x 16 x 640 Feature extraction module
+            end_point = "mixed_4"
+            with variable_scope.variable_scope(end_point):
+                with variable_scope.variable_scope("residual"):
+                    net = _feature_extraction_residual(net, first_layer_depth=48 * 2, second_layer_depth=64 * 2,
+                                                       last_layer_depth=96 * 2, scope='feature_extraction_residual')
+                    net_linear = layers.conv2d(net, int(net.shape[3]), [1, 1], activation_fn=None,
+                                               scope='net_linear_projection')
 
-                with variable_scope.variable_scope('Branch_1'):
-                    branch_1 = layers.conv2d(
-                        net, 96, [1, 1], scope='Conv2d_0a_1x1')
-                    branch_1 = layers.conv2d(
-                        branch_1, 128, [5, 5], scope='Conv2d_0b_5x5')
-                    branch_1 = layers.conv2d(
-                        branch_1, 192, [5, 5], scope='Conv2d_0c_5x5')
+                with variable_scope.variable_scope("shortcut"):
+                    shortcuts = _shortcuts_addition(net.shape, end_points[-1], end_points[-2],
+                                                    scope="shortcuts_addition")
 
-                with variable_scope.variable_scope('Branch_2'):
-                    branch_2 = layers.conv2d(
-                        net, 96, [1, 1], scope='Conv2d_0a_1x1')
-                    branch_2 = layers.conv2d(
-                        branch_2, 128, [7, 7], scope='Conv2d_0b_7x7')
+                net = nn_ops.relu(net_linear + shortcuts)
+                end_points.append(net)
+                if print_current_tensor: print(net, len(end_points))
 
-                with variable_scope.variable_scope('Branch_3'):
-                    branch_3 = layers_lib.avg_pool2d(net, [5, 5], scope='AvgPool_0a_5x5')
-                    branch_3 = layers.conv2d(
-                        branch_3, 192, [1, 1], scope='Conv2d_0b_1x1')
+            # mixed_5: 8 x 8 x 1280 Dimension reduction module
+            end_point = "mixed_5"
+            with variable_scope.variable_scope(end_point):
+                with variable_scope.variable_scope("residual"):
+                    net = _dimension_reduction_residual(net, branch_0_depth=224 * 2, branch_1_depth=96 * 2,
+                                                        scope='dimension_reduction_residual')
+                    net_linear = layers.conv2d(net, int(net.shape[3]), [1, 1], activation_fn=None,
+                                               scope='net_linear_projection')
 
-                net = array_ops.concat([branch_0, branch_1, branch_2, branch_3], 3)
-                if print_current_tensor: print(net)
+                with variable_scope.variable_scope("shortcut"):
+                    shortcuts = _shortcuts_addition(net.shape, end_points[-1], end_points[-2],
+                                                    scope="shortcuts_addition")
 
-            # mixed_4: 8 x 8 x 1280 Dimension reduction module
-            with variable_scope.variable_scope("mixed_4"):
-                with variable_scope.variable_scope('Branch_0'):
-                    branch_0 = layers.conv2d(
-                        net,
-                        448, [3, 3],
-                        stride=2,
-                        scope='Conv2d_1a_1x1')
+                net = nn_ops.relu(net_linear + shortcuts)
+                end_points.append(net)
+                if print_current_tensor: print(net, len(end_points))
 
-                with variable_scope.variable_scope('Branch_1'):
-                    branch_1 = layers.conv2d(
-                        net, 64, [1, 1], scope='Conv2d_0a_1x1')
-                    branch_1 = layers.conv2d(
-                        branch_1, 96, [3, 3], scope='Conv2d_0b_3x3')
-                    branch_1 = layers.conv2d(
-                        branch_1,
-                        192, [3, 3],
-                        stride=2,
-                        scope='Conv2d_1a_1x1')
+            # mixed_6: 8 x 8 x 1280 Dimension reduction module
+            end_point = "mixed_6"
+            with variable_scope.variable_scope(end_point):
+                with variable_scope.variable_scope("residual"):
+                    net = _feature_extraction_residual(net, first_layer_depth=48 * 4, second_layer_depth=64 * 4,
+                                                       last_layer_depth=96 * 4, scope='feature_extraction_residual')
+                    net_linear = layers.conv2d(net, int(net.shape[3]), [1, 1], activation_fn=None,
+                                               scope='net_linear_projection')
 
-                with variable_scope.variable_scope('Branch_2'):
-                    branch_2 = layers_lib.max_pool2d(
-                        net, [3, 3], stride=2, scope='MaxPool_1a_3x3')
+                with variable_scope.variable_scope("shortcut"):
+                    shortcuts = _shortcuts_addition(net.shape, end_points[-1], end_points[-2],
+                                                    scope="shortcuts_addition")
 
-                net = array_ops.concat([branch_0, branch_1, branch_2], 3)
-                if print_current_tensor: print(net)
+                net = nn_ops.relu(net_linear + shortcuts)
+                end_points.append(net)
+                if print_current_tensor: print(net, len(end_points))
 
-            # mixed_5: 4 x 4 x 1280 Dimension reduction module
-            with variable_scope.variable_scope("mixed_5"):
-                with variable_scope.variable_scope('Branch_0'):
-                    branch_0 = layers.conv2d(
-                        net,
-                        448, [3, 3],
-                        stride=2,
-                        scope='Conv2d_1a_1x1')
-
-                with variable_scope.variable_scope('Branch_1'):
-                    branch_1 = layers.conv2d(
-                        net, 64, [1, 1], scope='Conv2d_0a_1x1')
-                    branch_1 = layers.conv2d(
-                        branch_1, 96, [3, 3], scope='Conv2d_0b_3x3')
-                    branch_1 = layers.conv2d(
-                        branch_1,
-                        192, [3, 3],
-                        stride=2,
-                        scope='Conv2d_1a_1x1')
-
-                with variable_scope.variable_scope('Branch_2'):
-                    branch_2 = layers_lib.max_pool2d(
-                        net, [3, 3], stride=2, scope='MaxPool_1a_3x3')
-                    branch_2 = layers.conv2d(
-                        branch_2, 640, [1, 1], scope='Conv2d_0b_1x1')
-
-                net = array_ops.concat([branch_0, branch_1, branch_2], 3)
-                if print_current_tensor: print(net)
-
-            # Final pooling and prediction
-            with variable_scope.variable_scope('Logits'):
+        # Final pooling and prediction
+        with variable_scope.variable_scope('Logits'):
+            with arg_scope([layers.conv2d], normalizer_fn=None):
+                net = layers.conv2d(net, int(net.shape[3]), [3, 3], stride=2, scope='conv2d_1a_3x3')
+                # 4 x 4 x 1280
                 net = layers_lib.avg_pool2d(
                     net,
                     [4, 4],
@@ -358,3 +413,45 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
                     # 3
 
     return logits
+
+
+def ldnet_v1_arg_scope(weight_decay=0.004,
+                       stddev=0.1,
+                       batch_norm_var_collection='moving_vars'):
+    """Defines the default ldnet_v1 arg scope.
+    Args:
+      weight_decay: The weight decay to use for regularizing the model.
+      stddev: The standard deviation of the trunctated normal weight initializer.
+      batch_norm_var_collection: The name of the collection for the batch norm
+        variables.
+    Returns:
+      An `arg_scope` to use for the ldnet_v1 model.
+    """
+    batch_norm_params = {
+        # Decay for the moving averages.
+        'decay': 0.9997,
+        # epsilon to prevent 0s in variance.
+        'epsilon': 0.001,
+        # collection containing update_ops.
+        'updates_collections': ops.GraphKeys.UPDATE_OPS,
+        # collection containing the moving mean and moving variance.
+        'variables_collections': {
+            'beta': None,
+            'gamma': None,
+            'moving_mean': [batch_norm_var_collection],
+            'moving_variance': [batch_norm_var_collection],
+        }
+    }
+
+    # Set weight_decay for weights in Conv and FC layers.
+    with arg_scope(
+            [layers.conv2d, layers_lib.fully_connected],
+            weights_regularizer=regularizers.l2_regularizer(weight_decay)):
+        with arg_scope(
+                [layers.conv2d],
+                weights_initializer=init_ops.truncated_normal_initializer(
+                    stddev=stddev),
+                activation_fn=nn_ops.relu,
+                normalizer_fn=layers_lib.batch_norm,
+                normalizer_params=batch_norm_params) as sc:
+            return sc
