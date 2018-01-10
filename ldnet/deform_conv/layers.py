@@ -2,6 +2,7 @@ from __future__ import absolute_import, division
 
 
 import tensorflow as tf
+from tensorflow.contrib.layers.python.layers import regularizers
 from keras.layers import Conv2D
 from keras.initializers import RandomNormal
 from deform_conv.deform_conv import tf_batch_map_offsets
@@ -34,6 +35,7 @@ class ConvOffset2D(Conv2D):
         super(ConvOffset2D, self).__init__(
             self.filters * 2, (3, 3), padding='same', use_bias=False,
             kernel_initializer=RandomNormal(0, init_normal_stddev),
+            kernel_regularizer=regularizers.l2_regularizer(0.004),
             **kwargs
         )
 
