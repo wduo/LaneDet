@@ -10,7 +10,7 @@ from stp0_generate_subimgs import factor_right_unused
 
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 128, """Number of images to process in a batch.""")
+tf.app.flags.DEFINE_integer('batch_size', 64, """Number of images to process in a batch.""")
 
 # # Global constants describing the cells data set.
 # factor_for_h = stp0_generate_subimgs.factor_for_h  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
