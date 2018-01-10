@@ -10,6 +10,8 @@ from tensorflow.python.ops import nn_ops
 
 import tensorflow as tf
 
+from deform_conv.layers import ConvOffset2D
+
 
 def _variable_on_cpu(name, shape, initializer):
     """Helper to create a Variable stored on CPU memory.
@@ -51,7 +53,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
 
 
 def _feature_extraction_residual(net, first_layer_depth=48, second_layer_depth=64, last_layer_depth=96,
-                                 scope='feature_extraction_residual'):
+                                 use_deform_conv=False, scope='feature_extraction_residual'):
     """
     Feature extraction module of ldnet-v1.
     :param net: the net input.
@@ -67,20 +69,28 @@ def _feature_extraction_residual(net, first_layer_depth=48, second_layer_depth=6
         with variable_scope.variable_scope('Branch_0'):
             branch_0 = layers.conv2d(
                 net, first_layer_depth, [1, 1], scope='Conv2d_0a_1x1')
+            if use_deform_conv:
+                branch_0 = ConvOffset2D(first_layer_depth, name='conv3_offset')(branch_0)  # net offset
             branch_0 = layers.conv2d(
                 branch_0, second_layer_depth, [3, 3], scope='Conv2d_0b_3x3')
 
         with variable_scope.variable_scope('Branch_1'):
             branch_1 = layers.conv2d(
                 net, first_layer_depth, [1, 1], scope='Conv2d_0a_1x1')
+            if use_deform_conv:
+                branch_1 = ConvOffset2D(first_layer_depth, name='conv3_offset')(branch_1)  # net offset
             branch_1 = layers.conv2d(
                 branch_1, second_layer_depth, [5, 5], scope='Conv2d_0b_5x5')
+            if use_deform_conv:
+                branch_1 = ConvOffset2D(second_layer_depth, name='conv3_offset')(branch_1)  # net offset
             branch_1 = layers.conv2d(
                 branch_1, last_layer_depth, [5, 5], scope='Conv2d_0c_5x5')
 
         with variable_scope.variable_scope('Branch_2'):
             branch_2 = layers.conv2d(
                 net, first_layer_depth, [1, 1], scope='Conv2d_0a_1x1')
+            if use_deform_conv:
+                branch_2 = ConvOffset2D(first_layer_depth, name='conv3_offset')(branch_2)  # net offset
             branch_2 = layers.conv2d(
                 branch_2, second_layer_depth, [7, 7], scope='Conv2d_0b_7x7')
 
@@ -94,7 +104,8 @@ def _feature_extraction_residual(net, first_layer_depth=48, second_layer_depth=6
     return net
 
 
-def _dimension_reduction(net, branch_0_depth=224, branch_1_depth=96, scope='dimension_reduction'):
+def _dimension_reduction(net, branch_0_depth=224, branch_1_depth=96, use_deform_conv=False,
+                         scope='dimension_reduction'):
     """
     Dimension reduction module of ldnet-v1.
     :param net: the net input.
@@ -116,8 +127,12 @@ def _dimension_reduction(net, branch_0_depth=224, branch_1_depth=96, scope='dime
         with variable_scope.variable_scope('Branch_1'):
             branch_1 = layers.conv2d(
                 net, 64, [1, 1], scope='Conv2d_0a_1x1')
+            if use_deform_conv:
+                branch_1 = ConvOffset2D(64, name='conv3_offset')(branch_1)  # net offset
             branch_1 = layers.conv2d(
                 branch_1, 96, [3, 3], scope='Conv2d_0b_3x3')
+            if use_deform_conv:
+                branch_1 = ConvOffset2D(96, name='conv3_offset')(branch_1)  # net offset
             branch_1 = layers.conv2d(
                 branch_1,
                 branch_1_depth, [3, 3],
@@ -178,7 +193,7 @@ def _shortcuts_addition(net_shape, prev_net, prev_prev_net, scope="shortcuts_add
 
 
 def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True, scope="ldnet",
-             print_current_tensor=False):
+             use_deform_conv=True, print_current_tensor=False):
     """
     ldnet architecture:
         input: 32*32*3
@@ -213,6 +228,7 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
     :param dropout_keep_prob: dropout probability.
     :param spatial_squeeze: whether or not squeeze.
     :param scope: optional scope.
+    :param use_deform_conv: whether to use deform conv.
     :param print_current_tensor: whether or not print current tenser shape, name and type.
 
     :return:
@@ -230,18 +246,26 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
                 stride=1,
                 padding='SAME'):
             # input: 32 * 32 * 3
+            net = inputs
 
             end_point = "conv0"
-            net = layers.conv2d(inputs, 32, scope=end_point)
-            if print_current_tensor: print(net)
+            if use_deform_conv:
+                net = ConvOffset2D(3, name='conv0_offset')(net)  # net offset
+            net = layers.conv2d(net, 32, scope=end_point)
+            if print_current_tensor:
+                print(net)
             # --> 32 * 32 * 32
 
             end_point = "conv1"
+            if use_deform_conv:
+                net = ConvOffset2D(32, name='conv1_offset')(net)  # net offset
             net = layers.conv2d(net, 32, scope=end_point)
             if print_current_tensor: print(net)
             # --> 32 * 32 * 32
 
             end_point = "conv2"
+            if use_deform_conv:
+                net = ConvOffset2D(32, name='conv2_offset')(net)  # net offset
             net = layers.conv2d(net, 64, scope=end_point)
             if print_current_tensor: print(net)
             # --> 32 * 32 * 64
@@ -252,6 +276,8 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
             # --> 32 * 32 * 64
 
             end_point = 'conv3'
+            if use_deform_conv:
+                net = ConvOffset2D(64, name='conv3_offset')(net)  # net offset
             net = layers.conv2d(net, 192, scope=end_point)
             if print_current_tensor: print(net)
             # end_points.append(net)
