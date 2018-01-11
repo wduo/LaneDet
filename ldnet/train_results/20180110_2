@@ -1,4 +1,32 @@
 
+layer.py:
+kernel_regularizer=regularizers.l2_regularizer(0.004),
+....
+
+stp4_ldnet_v1.py:
+weights = _variable_with_weight_decay('weights', shape=[640, 320],
+                                                          stddev=0.04, wd=0.0001)
+....
+
+def ldnet_v1_arg_scope(weight_decay=0.0004,
+                       stddev=0.1,
+                       batch_norm_var_collection='moving_vars'):
+    """Defines the default ldnet_v1 arg scope.
+....
+
+stp5_ldnet_train.py:
+# constants describing the current file.
+MAX_STEPS = 5000
+NUM_CLASS = 3
+MODEL_SAVE_PATH = "/tmp/ldnet/saved_model"
+MODEL_NAME = "ldnet_model.ckpt"
+SUMMARIES_PATH = "/tmp/ldnet/summaries"
+MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = NUM_EXAMPLES * images_amount_counter['train']
+INITIAL_LEARNING_RATE = 0.001  # Initial learning rate.
+LEARNING_RATE_DECAY_FACTOR = 0.96  # Learning rate decay factor.
+NUM_EPOCHS_PER_DECAY = 32  # Epochs after which learning rate decays.
+....
 
 
 /usr/bin/python3.5 /home/ipprdl/www/LaneDet/ldnet/stp5_ldnet_train.py

@@ -1,0 +1,515 @@
+
+layer.py:
+kernel_regularizer=regularizers.l2_regularizer(0.0004),<------
+....
+
+stp4_ldnet_v1.py:
+weights = _variable_with_weight_decay('weights', shape=[640, 320],
+                                                          stddev=0.04, wd=0.0001)
+....
+
+def ldnet_v1_arg_scope(weight_decay=0.0004,
+                       stddev=0.1,
+                       batch_norm_var_collection='moving_vars'):
+    """Defines the default ldnet_v1 arg scope.
+....
+
+stp5_ldnet_train.py:
+# constants describing the current file.
+MAX_STEPS = 5000
+NUM_CLASS = 3
+MODEL_SAVE_PATH = "/tmp/ldnet/saved_model"
+MODEL_NAME = "ldnet_model.ckpt"
+SUMMARIES_PATH = "/tmp/ldnet/summaries"
+MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = NUM_EXAMPLES * images_amount_counter['train']
+INITIAL_LEARNING_RATE = 0.001  # Initial learning rate.
+LEARNING_RATE_DECAY_FACTOR = 0.96  # Learning rate decay factor.
+NUM_EPOCHS_PER_DECAY = 32  # Epochs after which learning rate decays.
+....
+
+
+/usr/bin/python3.5 /home/ipprdl/www/LaneDet/ldnet/stp5_ldnet_train.py
+Using TensorFlow backend.
+2018-01-11 10:50:00.244245: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:892] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2018-01-11 10:50:00.244512: I tensorflow/core/common_runtime/gpu/gpu_device.cc:962] Found device 0 with properties: 
+name: GeForce GTX 1080 Ti major: 6 minor: 1 memoryClockRate(GHz): 1.683
+pciBusID: 0000:01:00.0
+totalMemory: 10.90GiB freeMemory: 10.43GiB
+2018-01-11 10:50:00.244522: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1052] Creating TensorFlow device (/device:GPU:0) -> (device: 0, name: GeForce GTX 1080 Ti, pci bus id: 0000:01:00.0, compute capability: 6.1)
+Filling queue with 3686 images before starting to train. This will take a few minutes.
+Filling queue with 460 images before starting to validation. This will take a few minutes.
+2018-01-11 10:50:07.644978: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1052] Creating TensorFlow device (/device:GPU:0) -> (device: 0, name: GeForce GTX 1080 Ti, pci bus id: 0000:01:00.0, compute capability: 6.1)
+[2018-01-11 10:50:17.033754] Step 1: loss = 9.9, train accuracy = 81.2% (64 examples)
+[2018-01-11 10:50:17.594256]          validation accuracy = 59.4%
+[2018-01-11 10:50:26.083938] Step 11: loss = 3.5, train accuracy = 75.0% (64 examples)
+[2018-01-11 10:50:26.504866]          validation accuracy = 65.6%
+[2018-01-11 10:50:34.886490] Step 21: loss = 1.5, train accuracy = 79.7% (64 examples)
+[2018-01-11 10:50:35.317347]          validation accuracy = 53.1%
+[2018-01-11 10:50:43.707563] Step 31: loss = 1.1, train accuracy = 89.1% (64 examples)
+[2018-01-11 10:50:44.134467]          validation accuracy = 59.4%
+[2018-01-11 10:50:52.650028] Step 41: loss = 0.8, train accuracy = 87.5% (64 examples)
+[2018-01-11 10:50:53.082923]          validation accuracy = 64.1%
+[2018-01-11 10:51:01.741105] Step 51: loss = 0.6, train accuracy = 85.9% (64 examples)
+[2018-01-11 10:51:02.169107]          validation accuracy = 65.6%
+[2018-01-11 10:51:10.773487] Step 61: loss = 0.8, train accuracy = 84.4% (64 examples)
+[2018-01-11 10:51:11.205531]          validation accuracy = 64.1%
+[2018-01-11 10:51:19.817453] Step 71: loss = 0.5, train accuracy = 85.9% (64 examples)
+[2018-01-11 10:51:20.237789]          validation accuracy = 64.1%
+[2018-01-11 10:51:28.782150] Step 81: loss = 0.5, train accuracy = 90.6% (64 examples)
+[2018-01-11 10:51:29.219596]          validation accuracy = 62.5%
+[2018-01-11 10:51:37.715085] Step 91: loss = 0.4, train accuracy = 89.1% (64 examples)
+[2018-01-11 10:51:38.143663]          validation accuracy = 65.6%
+[2018-01-11 10:51:46.805331] Step 101: loss = 0.4, train accuracy = 92.2% (64 examples)
+[2018-01-11 10:51:47.225642]          validation accuracy = 59.4%
+[2018-01-11 10:51:55.926800] Step 111: loss = 0.4, train accuracy = 92.2% (64 examples)
+[2018-01-11 10:51:56.348049]          validation accuracy = 53.1%
+[2018-01-11 10:52:04.997503] Step 121: loss = 0.3, train accuracy = 92.2% (64 examples)
+[2018-01-11 10:52:05.448777]          validation accuracy = 65.6%
+[2018-01-11 10:52:13.972934] Step 131: loss = 0.4, train accuracy = 89.1% (64 examples)
+[2018-01-11 10:52:14.391563]          validation accuracy = 60.9%
+[2018-01-11 10:52:22.723158] Step 141: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:52:23.143048]          validation accuracy = 59.4%
+[2018-01-11 10:52:31.518514] Step 151: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:52:31.935561]          validation accuracy = 59.4%
+[2018-01-11 10:52:40.358638] Step 161: loss = 0.3, train accuracy = 92.2% (64 examples)
+[2018-01-11 10:52:40.780570]          validation accuracy = 57.8%
+[2018-01-11 10:52:49.093546] Step 171: loss = 0.4, train accuracy = 90.6% (64 examples)
+[2018-01-11 10:52:49.512017]          validation accuracy = 64.1%
+[2018-01-11 10:52:57.899421] Step 181: loss = 0.2, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:52:58.320040]          validation accuracy = 60.9%
+[2018-01-11 10:53:06.543783] Step 191: loss = 0.2, train accuracy = 93.8% (64 examples)
+[2018-01-11 10:53:06.963020]          validation accuracy = 62.5%
+[2018-01-11 10:53:15.219507] Step 201: loss = 0.2, train accuracy = 95.3% (64 examples)
+[2018-01-11 10:53:15.637182]          validation accuracy = 64.1%
+[2018-01-11 10:53:23.887189] Step 211: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:53:24.306730]          validation accuracy = 62.5%
+[2018-01-11 10:53:32.626695] Step 221: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:53:33.045145]          validation accuracy = 64.1%
+[2018-01-11 10:53:41.455540] Step 231: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:53:41.874551]          validation accuracy = 59.4%
+[2018-01-11 10:53:50.246756] Step 241: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:53:50.668497]          validation accuracy = 60.9%
+[2018-01-11 10:53:59.038248] Step 251: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:53:59.457732]          validation accuracy = 54.7%
+[2018-01-11 10:54:07.759386] Step 261: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:54:08.180230]          validation accuracy = 62.5%
+[2018-01-11 10:54:16.484727] Step 271: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:54:16.910079]          validation accuracy = 62.5%
+[2018-01-11 10:54:25.241124] Step 281: loss = 0.2, train accuracy = 95.3% (64 examples)
+[2018-01-11 10:54:25.660556]          validation accuracy = 62.5%
+[2018-01-11 10:54:34.011403] Step 291: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:54:34.430022]          validation accuracy = 64.1%
+[2018-01-11 10:54:42.792697] Step 301: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:54:43.218671]          validation accuracy = 62.5%
+[2018-01-11 10:54:51.582871] Step 311: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:54:52.004223]          validation accuracy = 59.4%
+[2018-01-11 10:55:00.500463] Step 321: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:55:00.920340]          validation accuracy = 59.4%
+[2018-01-11 10:55:09.360987] Step 331: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:55:09.785945]          validation accuracy = 57.8%
+[2018-01-11 10:55:18.261837] Step 341: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:55:18.684794]          validation accuracy = 60.9%
+[2018-01-11 10:55:27.277653] Step 351: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:55:27.697478]          validation accuracy = 62.5%
+[2018-01-11 10:55:36.123392] Step 361: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:55:36.541597]          validation accuracy = 59.4%
+[2018-01-11 10:55:44.834068] Step 371: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:55:45.253662]          validation accuracy = 64.1%
+[2018-01-11 10:55:53.803224] Step 381: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:55:54.223385]          validation accuracy = 60.9%
+[2018-01-11 10:56:02.725304] Step 391: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:56:03.150609]          validation accuracy = 65.6%
+[2018-01-11 10:56:12.018943] Step 401: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:56:12.443208]          validation accuracy = 60.9%
+[2018-01-11 10:56:21.068367] Step 411: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:56:21.489032]          validation accuracy = 59.4%
+[2018-01-11 10:56:29.793240] Step 421: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 10:56:30.211714]          validation accuracy = 62.5%
+[2018-01-11 10:56:38.545166] Step 431: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 10:56:38.965579]          validation accuracy = 59.4%
+[2018-01-11 10:56:47.256743] Step 441: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:56:47.674999]          validation accuracy = 59.4%
+[2018-01-11 10:56:56.005563] Step 451: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:56:56.423771]          validation accuracy = 62.5%
+[2018-01-11 10:57:04.886868] Step 461: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:05.345284]          validation accuracy = 59.4%
+[2018-01-11 10:57:13.855371] Step 471: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:14.274392]          validation accuracy = 60.9%
+[2018-01-11 10:57:22.750867] Step 481: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:23.170051]          validation accuracy = 57.8%
+[2018-01-11 10:57:31.542372] Step 491: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:31.957994]          validation accuracy = 59.4%
+[2018-01-11 10:57:40.302579] Step 501: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:40.719297]          validation accuracy = 57.8%
+[2018-01-11 10:57:49.126596] Step 511: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:49.568184]          validation accuracy = 62.5%
+[2018-01-11 10:57:58.104574] Step 521: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:57:58.523548]          validation accuracy = 57.8%
+[2018-01-11 10:58:07.012508] Step 531: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:58:07.430482]          validation accuracy = 60.9%
+[2018-01-11 10:58:15.952491] Step 541: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:58:16.378371]          validation accuracy = 60.9%
+[2018-01-11 10:58:24.837101] Step 551: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:58:25.254043]          validation accuracy = 60.9%
+[2018-01-11 10:58:33.717193] Step 561: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:58:34.134905]          validation accuracy = 57.8%
+[2018-01-11 10:58:42.607552] Step 571: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:58:43.051803]          validation accuracy = 62.5%
+[2018-01-11 10:58:51.580217] Step 581: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:58:52.004155]          validation accuracy = 59.4%
+[2018-01-11 10:59:00.378574] Step 591: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:00.798878]          validation accuracy = 59.4%
+[2018-01-11 10:59:09.159470] Step 601: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:09.580498]          validation accuracy = 59.4%
+[2018-01-11 10:59:17.903377] Step 611: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:18.320166]          validation accuracy = 60.9%
+[2018-01-11 10:59:26.771476] Step 621: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:27.187974]          validation accuracy = 57.8%
+[2018-01-11 10:59:35.706872] Step 631: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:36.126025]          validation accuracy = 60.9%
+[2018-01-11 10:59:44.499748] Step 641: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:44.923067]          validation accuracy = 60.9%
+[2018-01-11 10:59:53.698874] Step 651: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 10:59:54.127498]          validation accuracy = 60.9%
+[2018-01-11 11:00:02.827868] Step 661: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:00:03.253308]          validation accuracy = 56.2%
+[2018-01-11 11:00:11.702293] Step 671: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:00:12.123755]          validation accuracy = 56.2%
+[2018-01-11 11:00:20.523269] Step 681: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:00:20.942776]          validation accuracy = 57.8%
+[2018-01-11 11:00:29.601704] Step 691: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:00:30.019491]          validation accuracy = 59.4%
+[2018-01-11 11:00:38.523543] Step 701: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:00:38.952467]          validation accuracy = 62.5%
+[2018-01-11 11:00:47.401943] Step 711: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:00:47.849062]          validation accuracy = 59.4%
+[2018-01-11 11:00:56.357794] Step 721: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:00:56.776494]          validation accuracy = 60.9%
+[2018-01-11 11:01:05.548516] Step 731: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:01:05.993944]          validation accuracy = 60.9%
+[2018-01-11 11:01:14.458494] Step 741: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:01:14.900599]          validation accuracy = 60.9%
+[2018-01-11 11:01:23.367806] Step 751: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:01:23.811948]          validation accuracy = 56.2%
+[2018-01-11 11:01:32.404233] Step 761: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:01:32.824558]          validation accuracy = 60.9%
+[2018-01-11 11:01:41.240867] Step 771: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:01:41.662158]          validation accuracy = 62.5%
+[2018-01-11 11:01:50.001376] Step 781: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:01:50.434714]          validation accuracy = 60.9%
+[2018-01-11 11:01:58.908631] Step 791: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:01:59.327053]          validation accuracy = 64.1%
+[2018-01-11 11:02:08.018160] Step 801: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:02:08.436010]          validation accuracy = 57.8%
+[2018-01-11 11:02:16.836863] Step 811: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:02:17.257773]          validation accuracy = 56.2%
+[2018-01-11 11:02:25.988138] Step 821: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:02:26.418638]          validation accuracy = 57.8%
+[2018-01-11 11:02:34.933575] Step 831: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:02:35.366796]          validation accuracy = 62.5%
+[2018-01-11 11:02:43.750075] Step 841: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:02:44.172800]          validation accuracy = 62.5%
+[2018-01-11 11:02:52.553532] Step 851: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:02:52.983339]          validation accuracy = 57.8%
+[2018-01-11 11:03:01.408346] Step 861: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:03:01.839098]          validation accuracy = 60.9%
+[2018-01-11 11:03:10.346425] Step 871: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:03:10.768271]          validation accuracy = 54.7%
+[2018-01-11 11:03:19.434767] Step 881: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:03:19.860152]          validation accuracy = 64.1%
+[2018-01-11 11:03:28.509803] Step 891: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:03:28.937855]          validation accuracy = 65.6%
+[2018-01-11 11:03:37.609485] Step 901: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:03:38.036100]          validation accuracy = 57.8%
+[2018-01-11 11:03:46.683768] Step 911: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:03:47.111566]          validation accuracy = 54.7%
+[2018-01-11 11:03:55.504791] Step 921: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:03:55.925188]          validation accuracy = 57.8%
+[2018-01-11 11:04:04.372510] Step 931: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:04:04.790546]          validation accuracy = 65.6%
+[2018-01-11 11:04:13.086536] Step 941: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:04:13.509098]          validation accuracy = 62.5%
+[2018-01-11 11:04:21.911429] Step 951: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:04:22.330815]          validation accuracy = 57.8%
+[2018-01-11 11:04:30.655010] Step 961: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:04:31.075200]          validation accuracy = 62.5%
+[2018-01-11 11:04:39.509797] Step 971: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:04:39.927397]          validation accuracy = 57.8%
+[2018-01-11 11:04:48.261681] Step 981: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:04:48.679762]          validation accuracy = 62.5%
+[2018-01-11 11:04:57.185844] Step 991: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:04:57.617388]          validation accuracy = 59.4%
+[2018-01-11 11:05:06.179827] Step 1001: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:05:06.598365]          validation accuracy = 59.4%
+[2018-01-11 11:05:14.889702] Step 1011: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:05:15.312564]          validation accuracy = 60.9%
+[2018-01-11 11:05:23.893179] Step 1021: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:05:24.314141]          validation accuracy = 57.8%
+[2018-01-11 11:05:32.699244] Step 1031: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:05:33.120579]          validation accuracy = 57.8%
+[2018-01-11 11:05:41.477610] Step 1041: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:05:41.895666]          validation accuracy = 59.4%
+[2018-01-11 11:05:50.373949] Step 1051: loss = 0.1, train accuracy = 96.9% (64 examples)
+[2018-01-11 11:05:50.794337]          validation accuracy = 59.4%
+[2018-01-11 11:05:59.277829] Step 1061: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:05:59.693846]          validation accuracy = 60.9%
+[2018-01-11 11:06:08.275015] Step 1071: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:06:08.697670]          validation accuracy = 59.4%
+[2018-01-11 11:06:17.051923] Step 1081: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:06:17.470653]          validation accuracy = 60.9%
+[2018-01-11 11:06:25.848263] Step 1091: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:06:26.271399]          validation accuracy = 56.2%
+[2018-01-11 11:06:34.776787] Step 1101: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:06:35.206884]          validation accuracy = 60.9%
+[2018-01-11 11:06:43.702698] Step 1111: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:06:44.121237]          validation accuracy = 60.9%
+[2018-01-11 11:06:52.692588] Step 1121: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:06:53.118474]          validation accuracy = 57.8%
+[2018-01-11 11:07:01.634398] Step 1131: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:02.061526]          validation accuracy = 59.4%
+[2018-01-11 11:07:10.610378] Step 1141: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:11.036614]          validation accuracy = 59.4%
+[2018-01-11 11:07:19.404587] Step 1151: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:19.827850]          validation accuracy = 59.4%
+[2018-01-11 11:07:28.293746] Step 1161: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:28.726879]          validation accuracy = 59.4%
+[2018-01-11 11:07:37.110142] Step 1171: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:37.526140]          validation accuracy = 54.7%
+[2018-01-11 11:07:45.910988] Step 1181: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:46.337156]          validation accuracy = 56.2%
+[2018-01-11 11:07:54.766990] Step 1191: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:07:55.194251]          validation accuracy = 62.5%
+[2018-01-11 11:08:03.697706] Step 1201: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:04.117177]          validation accuracy = 60.9%
+[2018-01-11 11:08:12.566089] Step 1211: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:13.001154]          validation accuracy = 57.8%
+[2018-01-11 11:08:21.432575] Step 1221: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:21.851714]          validation accuracy = 60.9%
+[2018-01-11 11:08:30.211833] Step 1231: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:30.633201]          validation accuracy = 60.9%
+[2018-01-11 11:08:39.015710] Step 1241: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:39.439011]          validation accuracy = 64.1%
+[2018-01-11 11:08:47.867472] Step 1251: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:48.285968]          validation accuracy = 56.2%
+[2018-01-11 11:08:56.709821] Step 1261: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:08:57.135002]          validation accuracy = 60.9%
+[2018-01-11 11:09:05.582903] Step 1271: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:09:06.016872]          validation accuracy = 56.2%
+[2018-01-11 11:09:14.404921] Step 1281: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:09:14.823312]          validation accuracy = 57.8%
+[2018-01-11 11:09:23.205013] Step 1291: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:09:23.630357]          validation accuracy = 64.1%
+[2018-01-11 11:09:31.987594] Step 1301: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:09:32.412410]          validation accuracy = 60.9%
+[2018-01-11 11:09:40.767572] Step 1311: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:09:41.184890]          validation accuracy = 59.4%
+[2018-01-11 11:09:49.632020] Step 1321: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:09:50.065014]          validation accuracy = 62.5%
+[2018-01-11 11:09:58.457747] Step 1331: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:09:58.878176]          validation accuracy = 59.4%
+[2018-01-11 11:10:07.184804] Step 1341: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:10:07.606867]          validation accuracy = 57.8%
+[2018-01-11 11:10:15.946911] Step 1351: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:10:16.364112]          validation accuracy = 62.5%
+[2018-01-11 11:10:24.619894] Step 1361: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:10:25.038130]          validation accuracy = 60.9%
+[2018-01-11 11:10:33.408488] Step 1371: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:10:33.824770]          validation accuracy = 59.4%
+[2018-01-11 11:10:42.267132] Step 1381: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:10:42.685644]          validation accuracy = 60.9%
+[2018-01-11 11:10:51.032013] Step 1391: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:10:51.456748]          validation accuracy = 62.5%
+[2018-01-11 11:10:59.851631] Step 1401: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:00.270585]          validation accuracy = 59.4%
+[2018-01-11 11:11:08.845461] Step 1411: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:09.274934]          validation accuracy = 59.4%
+[2018-01-11 11:11:17.703667] Step 1421: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:18.134082]          validation accuracy = 57.8%
+[2018-01-11 11:11:26.568257] Step 1431: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:26.987492]          validation accuracy = 62.5%
+[2018-01-11 11:11:35.418520] Step 1441: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:35.841649]          validation accuracy = 56.2%
+[2018-01-11 11:11:44.263324] Step 1451: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:44.681645]          validation accuracy = 62.5%
+[2018-01-11 11:11:53.058021] Step 1461: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:11:53.474188]          validation accuracy = 62.5%
+[2018-01-11 11:12:01.822358] Step 1471: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:02.240094]          validation accuracy = 65.6%
+[2018-01-11 11:12:10.762396] Step 1481: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:11.193659]          validation accuracy = 62.5%
+[2018-01-11 11:12:19.535702] Step 1491: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:19.954620]          validation accuracy = 64.1%
+[2018-01-11 11:12:28.390704] Step 1501: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:28.809715]          validation accuracy = 59.4%
+[2018-01-11 11:12:37.218362] Step 1511: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:37.638523]          validation accuracy = 62.5%
+[2018-01-11 11:12:46.119074] Step 1521: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:46.535655]          validation accuracy = 60.9%
+[2018-01-11 11:12:54.881319] Step 1531: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:12:55.309180]          validation accuracy = 60.9%
+[2018-01-11 11:13:03.946928] Step 1541: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:04.377642]          validation accuracy = 57.8%
+[2018-01-11 11:13:12.997424] Step 1551: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:13.432581]          validation accuracy = 56.2%
+[2018-01-11 11:13:21.768239] Step 1561: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:22.187199]          validation accuracy = 62.5%
+[2018-01-11 11:13:30.636405] Step 1571: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:31.057073]          validation accuracy = 57.8%
+[2018-01-11 11:13:39.475501] Step 1581: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:39.893790]          validation accuracy = 59.4%
+[2018-01-11 11:13:48.235243] Step 1591: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:48.651932]          validation accuracy = 60.9%
+[2018-01-11 11:13:56.910685] Step 1601: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:13:57.334867]          validation accuracy = 60.9%
+[2018-01-11 11:14:05.622673] Step 1611: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:06.045243]          validation accuracy = 60.9%
+[2018-01-11 11:14:14.491404] Step 1621: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:14.912705]          validation accuracy = 59.4%
+[2018-01-11 11:14:23.336648] Step 1631: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:23.753786]          validation accuracy = 56.2%
+[2018-01-11 11:14:32.236382] Step 1641: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:32.668208]          validation accuracy = 56.2%
+[2018-01-11 11:14:41.007550] Step 1651: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:41.425684]          validation accuracy = 59.4%
+[2018-01-11 11:14:49.804575] Step 1661: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:50.222364]          validation accuracy = 60.9%
+[2018-01-11 11:14:58.726548] Step 1671: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:14:59.141633]          validation accuracy = 64.1%
+[2018-01-11 11:15:07.542045] Step 1681: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:15:07.964626]          validation accuracy = 62.5%
+[2018-01-11 11:15:16.444529] Step 1691: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:15:16.864292]          validation accuracy = 59.4%
+[2018-01-11 11:15:25.298905] Step 1701: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:15:25.716419]          validation accuracy = 62.5%
+[2018-01-11 11:15:34.156840] Step 1711: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:15:34.585058]          validation accuracy = 59.4%
+[2018-01-11 11:15:43.004909] Step 1721: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:15:43.421273]          validation accuracy = 59.4%
+[2018-01-11 11:15:51.925530] Step 1731: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:15:52.349544]          validation accuracy = 59.4%
+[2018-01-11 11:16:00.738496] Step 1741: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:01.158449]          validation accuracy = 64.1%
+[2018-01-11 11:16:09.539822] Step 1751: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:09.957169]          validation accuracy = 59.4%
+[2018-01-11 11:16:18.334546] Step 1761: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:18.752309]          validation accuracy = 65.6%
+[2018-01-11 11:16:27.139281] Step 1771: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:27.556969]          validation accuracy = 57.8%
+[2018-01-11 11:16:35.858391] Step 1781: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:36.277699]          validation accuracy = 57.8%
+[2018-01-11 11:16:44.686672] Step 1791: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:45.112644]          validation accuracy = 57.8%
+[2018-01-11 11:16:53.475533] Step 1801: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:16:53.894094]          validation accuracy = 62.5%
+[2018-01-11 11:17:02.311770] Step 1811: loss = 0.1, train accuracy = 98.4% (64 examples)
+[2018-01-11 11:17:02.731828]          validation accuracy = 57.8%
+[2018-01-11 11:17:11.213052] Step 1821: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:17:11.631838]          validation accuracy = 57.8%
+[2018-01-11 11:17:20.070648] Step 1831: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:17:20.486667]          validation accuracy = 57.8%
+[2018-01-11 11:17:28.859266] Step 1841: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:17:29.279762]          validation accuracy = 59.4%
+[2018-01-11 11:17:37.664835] Step 1851: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:17:38.098765]          validation accuracy = 57.8%
+[2018-01-11 11:17:46.575495] Step 1861: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:17:47.017328]          validation accuracy = 57.8%
+[2018-01-11 11:17:55.544860] Step 1871: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:17:55.980510]          validation accuracy = 59.4%
+[2018-01-11 11:18:04.423238] Step 1881: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:04.849708]          validation accuracy = 60.9%
+[2018-01-11 11:18:13.293841] Step 1891: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:13.721898]          validation accuracy = 59.4%
+[2018-01-11 11:18:22.196714] Step 1901: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:22.618080]          validation accuracy = 60.9%
+[2018-01-11 11:18:30.974351] Step 1911: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:31.395176]          validation accuracy = 60.9%
+[2018-01-11 11:18:39.860639] Step 1921: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:40.296540]          validation accuracy = 59.4%
+[2018-01-11 11:18:48.742551] Step 1931: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:49.181187]          validation accuracy = 60.9%
+[2018-01-11 11:18:57.758957] Step 1941: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:18:58.221586]          validation accuracy = 62.5%
+[2018-01-11 11:19:06.782310] Step 1951: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:19:07.207846]          validation accuracy = 59.4%
+[2018-01-11 11:19:15.905573] Step 1961: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:19:16.330614]          validation accuracy = 59.4%
+[2018-01-11 11:19:24.774510] Step 1971: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:19:25.215476]          validation accuracy = 59.4%
+[2018-01-11 11:19:33.800926] Step 1981: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:19:34.221940]          validation accuracy = 60.9%
+[2018-01-11 11:19:42.634571] Step 1991: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:19:43.053153]          validation accuracy = 62.5%
+[2018-01-11 11:19:51.434601] Step 2001: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:19:51.853163]          validation accuracy = 59.4%
+[2018-01-11 11:20:00.233968] Step 2011: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:00.651373]          validation accuracy = 59.4%
+[2018-01-11 11:20:09.050829] Step 2021: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:09.468277]          validation accuracy = 59.4%
+[2018-01-11 11:20:17.892822] Step 2031: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:18.311954]          validation accuracy = 65.6%
+[2018-01-11 11:20:26.833251] Step 2041: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:27.261661]          validation accuracy = 60.9%
+[2018-01-11 11:20:35.700753] Step 2051: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:36.119932]          validation accuracy = 60.9%
+[2018-01-11 11:20:44.646514] Step 2061: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:45.064330]          validation accuracy = 57.8%
+[2018-01-11 11:20:53.532085] Step 2071: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:20:53.954907]          validation accuracy = 62.5%
+[2018-01-11 11:21:02.416857] Step 2081: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:02.834402]          validation accuracy = 60.9%
+[2018-01-11 11:21:11.256126] Step 2091: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:11.675865]          validation accuracy = 60.9%
+[2018-01-11 11:21:20.063949] Step 2101: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:20.481957]          validation accuracy = 57.8%
+[2018-01-11 11:21:28.898415] Step 2111: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:29.315045]          validation accuracy = 59.4%
+[2018-01-11 11:21:37.756906] Step 2121: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:38.179155]          validation accuracy = 60.9%
+[2018-01-11 11:21:46.680627] Step 2131: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:47.102836]          validation accuracy = 60.9%
+[2018-01-11 11:21:55.562554] Step 2141: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:21:55.980162]          validation accuracy = 62.5%
+[2018-01-11 11:22:04.406162] Step 2151: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:04.821167]          validation accuracy = 59.4%
+[2018-01-11 11:22:13.138155] Step 2161: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:13.556139]          validation accuracy = 57.8%
+[2018-01-11 11:22:21.886489] Step 2171: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:22.310637]          validation accuracy = 56.2%
+[2018-01-11 11:22:30.813930] Step 2181: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:31.234524]          validation accuracy = 57.8%
+[2018-01-11 11:22:39.658479] Step 2191: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:40.079048]          validation accuracy = 57.8%
+[2018-01-11 11:22:48.577014] Step 2201: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:49.011090]          validation accuracy = 57.8%
+[2018-01-11 11:22:57.525014] Step 2211: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:22:57.947705]          validation accuracy = 59.4%
+[2018-01-11 11:23:06.459090] Step 2221: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:23:06.879550]          validation accuracy = 60.9%
+[2018-01-11 11:23:15.358805] Step 2231: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:23:15.782582]          validation accuracy = 59.4%
+[2018-01-11 11:23:24.357065] Step 2241: loss = 0.1, train accuracy = 100.0% (64 examples)
+[2018-01-11 11:23:24.780591]          validation accuracy = 57.8%
+Traceback (most recent call last):
+  File "/home/ipprdl/www/LaneDet/ldnet/stp5_ldnet_train.py", line 195, in <module>
+    tf.app.run()
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/platform/app.py", line 48, in run
+    _sys.exit(main(_sys.argv[:1] + flags_passthrough))
+  File "/home/ipprdl/www/LaneDet/ldnet/stp5_ldnet_train.py", line 191, in main
+    ldnet_train()
+  File "/home/ipprdl/www/LaneDet/ldnet/stp5_ldnet_train.py", line 156, in ldnet_train
+    labels_placeholder: train_labels})
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 889, in run
+    run_metadata_ptr)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1118, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1315, in _do_run
+    options, run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1321, in _do_call
+    return fn(*args)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1300, in _run_fn
+    status, run_metadata)
+KeyboardInterrupt
+
+Process finished with exit code 1
+

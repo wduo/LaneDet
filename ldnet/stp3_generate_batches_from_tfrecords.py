@@ -122,14 +122,15 @@ def generate_batches_from_tfrecords(records_name, train_or_validation):
     distorted_image = tf.random_crop(reshaped_image, [height, width, depth])
 
     # Randomly flip the image horizontally.
-    distorted_image = tf.image.random_flip_left_right(distorted_image)
+    # distorted_image = tf.image.random_flip_left_right(distorted_image)
+    result.float_image = tf.image.random_flip_left_right(distorted_image)
 
     # Because these operations are not commutative, consider randomizing
     # the order their operation.
     # NOTE: since per_image_standardization zeros the mean and makes
     # the stddev unit, this likely has no effect see tensorflow#1458.
-    distorted_image = tf.image.random_brightness(distorted_image, max_delta=63)
-    result.float_image = tf.image.random_contrast(distorted_image, lower=0.2, upper=1.8)
+    # distorted_image = tf.image.random_brightness(distorted_image, max_delta=63)
+    # result.float_image = tf.image.random_contrast(distorted_image, lower=0.2, upper=1.8)
 
     # Subtract off the mean and divide by the variance of the pixels.
     # result.float_image = tf.image.per_image_standardization(distorted_image)

@@ -35,7 +35,7 @@ class ConvOffset2D(Conv2D):
         super(ConvOffset2D, self).__init__(
             self.filters * 2, (3, 3), padding='same', use_bias=False,
             kernel_initializer=RandomNormal(0, init_normal_stddev),
-            kernel_regularizer=regularizers.l2_regularizer(0.004),
+            kernel_regularizer=regularizers.l2_regularizer(0.0004),
             **kwargs
         )
 
