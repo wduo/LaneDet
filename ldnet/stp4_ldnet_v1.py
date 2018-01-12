@@ -249,8 +249,8 @@ def ldnet_v1(inputs, num_classes=3, dropout_keep_prob=0.5, spatial_squeeze=True,
             net = inputs
 
             end_point = "conv0"
-            if use_deform_conv:
-                net = ConvOffset2D(3, name='conv0_offset')(net)  # net offset
+            # if use_deform_conv:
+            #     net = ConvOffset2D(3, name='conv0_offset')(net)  # net offset
             net = layers.conv2d(net, 32, scope=end_point)
             if print_current_tensor:
                 print(net)
