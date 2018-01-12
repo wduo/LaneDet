@@ -7,3 +7,4 @@ __pycache__/
 # dir1_merged_cells/
 *.tfrecords
 *.png
+*.jpg
