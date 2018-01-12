@@ -7,9 +7,15 @@ cwd = os.getcwd()
 # constants describing the cells data set.
 factor_for_h = 16  # 图片height方向上的划分因子 即行方向上划分出 factor_for_h 个 cell
 factor_for_w = 16  # 图片width方向上的划分因子 即列方向上划分出 factor_for_w 个 cell
+
 # RIO Selection. If don't select ROI, set follow four factors to 0.
-factor_top_unused = 6  # 不使用图片top的 factor_top_unused 行
-factor_bottom_unused = 4  # 不使用图片bottom的 factor_bottom_unused 行
+# for caltech-lanes/washington2
+# factor_top_unused = 6  # 不使用图片top的 factor_top_unused 行
+# factor_bottom_unused = 4  # 不使用图片bottom的 factor_bottom_unused 行
+# for data_wduo/img_tran5_city_night3_640x480
+factor_top_unused = 9  # 不使用图片top的 factor_top_unused 行
+factor_bottom_unused = 1  # 不使用图片bottom的 factor_bottom_unused 行
+
 factor_left_unused = 0  # 不使用图片top的 factor_left_unused 列
 factor_right_unused = 0  # 不使用图片bottom的 factor_right_unused 列
 
@@ -21,7 +27,7 @@ def generate_subimgs(data_dir, cells_dir, drawlines):
     """
     生成可直接用于制作 tfRecords 的cell
     :param data_dir: 图片文件夹所在的根目录
-    :param cells_dir: generate cells in this dir.
+    :param cells_dir: 生成的cells文件夹所在的根目录
     :param drawlines: 是否在原图上画标记以便于打标签
     :return: no return. but generate dirs(cell_dir) in current dir.
     """
