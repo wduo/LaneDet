@@ -10,17 +10,22 @@ factor_for_w = 16  # 图片width方向上的划分因子 即列方向上划分�
 
 # RIO Selection. If don't select ROI, set follow four factors to 0.
 # for caltech-lanes/washington2
-# factor_top_unused = 6  # 不使用图片top的 factor_top_unused 行
-# factor_bottom_unused = 4  # 不使用图片bottom的 factor_bottom_unused 行
-# for data_wduo/img_tran5_city_night3_640x480
-factor_top_unused = 9  # 不使用图片top的 factor_top_unused 行
-factor_bottom_unused = 1  # 不使用图片bottom的 factor_bottom_unused 行
+factor_top_unused = 6  # 不使用图片top的 factor_top_unused 行
+factor_bottom_unused = 4  # 不使用图片bottom的 factor_bottom_unused 行
+
+# for data_wduo/img_tran5_city_night2_640x480 & img_tran5_city_night3_640x480
+# factor_top_unused = 10  # 不使用图片top的 factor_top_unused 行
+# factor_bottom_unused = 0  # 不使用图片bottom的 factor_bottom_unused 行
+
+# for data_wduo/img_tran3_highway_day_new_640x480
+# factor_top_unused = 9  # 不使用图片top的 factor_top_unused 行
+# factor_bottom_unused = 1  # 不使用图片bottom的 factor_bottom_unused 行
 
 factor_left_unused = 0  # 不使用图片top的 factor_left_unused 列
 factor_right_unused = 0  # 不使用图片bottom的 factor_right_unused 列
 
 # variables using for current file.
-images_amount_counter = 0  # 图片数量计数器, 手动更改
+images_amount_counter = 0  # 图片数量计数器; stp3_generate_batches_from_tfrecords中需手动更改
 
 
 def generate_subimgs(data_dir, cells_dir, drawlines):
@@ -67,19 +72,24 @@ def generate_subimgs(data_dir, cells_dir, drawlines):
                         os.mkdir(cells_dir)
                     if not os.path.exists(cells_dir + "/" + sub_dir_basename):
                         os.mkdir(cells_dir + "/" + sub_dir_basename)
-                    if not os.path.exists(cells_dir + "/" + sub_dir_basename + "/" + img_name):
-                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/" + img_name)
+                    if not os.path.exists(cells_dir + "/" + sub_dir_basename + "/" + sub_dir_basename + "_" + img_name):
+                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/" + sub_dir_basename + "_" + img_name)
                         # Store road surface cells
-                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/" + img_name + "/road_surface_cells")
+                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/"
+                                 + sub_dir_basename + "_" + img_name + "/road_surface_cells")
                         # Store cluttered cells
-                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/" + img_name + "/cluttered_cells")
+                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/"
+                                 + sub_dir_basename + "_" + img_name + "/cluttered_cells")
                         # Store lane cells
-                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/" + img_name + "/lane_cells")
+                        os.mkdir(cells_dir + "/" + sub_dir_basename + "/"
+                                 + sub_dir_basename + "_" + img_name + "/lane_cells")
                     # Save cell to disk.
                     # And temporarily store to '/road_surface_cells' for manually labeling subsequently.
                     cell.save(
-                        cwd + "/" + cells_dir + "/" + sub_dir_basename + "/" + img_name + "/road_surface_cells/" + str(
-                            hh) + "_" + str(ww) + ".png")
+                        cwd + "/" + cells_dir + "/" + sub_dir_basename + "/"
+                        + sub_dir_basename + "_" + img_name
+                        + "/road_surface_cells/"
+                        + str(hh) + "_" + str(ww) + ".png")
                     # cell.show()
 
             if drawlines:
@@ -100,7 +110,8 @@ def generate_subimgs(data_dir, cells_dir, drawlines):
                         draw.text(xy=[cell_width * ww, cell_height * hh], text=str(hh) + "_" + str(ww),
                                   fill=(255, 0, 0))
 
-                img1.save(cwd + "/" + cells_dir + "/" + sub_dir_basename + "/" + img_name + "/" + img_name)
+                img1.save(cwd + "/" + cells_dir + "/" + sub_dir_basename + "/"
+                          + sub_dir_basename + "_" + img_name + "/" + img_name)
                 # img1.show()
 
 
