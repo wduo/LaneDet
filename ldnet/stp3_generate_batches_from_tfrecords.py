@@ -24,7 +24,7 @@ tf.app.flags.DEFINE_integer('batch_size', 64, """Number of images to process in 
 # constants describing the current file.
 tfrecords_images_size = [34, 34, 3]
 distorted_image_size = [32, 32, 3]
-images_amount_counter = {"train": 96, "validation": 12}  # 图片数量计数器, 手动更改
+images_amount_counter = {"train": 192, "validation": 24}  # 图片数量计数器, 手动更改
 NUM_EXAMPLES = (factor_for_h - factor_top_unused - factor_bottom_unused) * (
     factor_for_w - factor_left_unused - factor_right_unused)  # 每张图片有多少个cells
 
