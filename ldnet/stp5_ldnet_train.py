@@ -28,7 +28,7 @@ MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = NUM_EXAMPLES * images_amount_counter['train']
 INITIAL_LEARNING_RATE = 0.001  # Initial learning rate.
 LEARNING_RATE_DECAY_FACTOR = 0.96  # Learning rate decay factor.
-NUM_EPOCHS_PER_DECAY = 32  # Epochs after which learning rate decays.
+NUM_EPOCHS_PER_DECAY = 4  # Epochs after which learning rate decays.
 
 
 def add_training_ops(num_class, global_step):
