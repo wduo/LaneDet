@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from tensorflow.contrib.framework.python.ops import arg_scope
 from PIL import Image, ImageDraw
 
 from stp0_generate_subimgs import factor_for_h
@@ -14,7 +15,8 @@ from stp5_ldnet_train import MODEL_SAVE_PATH
 from stp5_ldnet_train import NUM_CLASS
 from stp5_ldnet_train import MOVING_AVERAGE_DECAY
 
-import stp4_ldnet
+# import stp4_ldnet
+import stp4_ldnet_v1
 
 # constants describing the current file.
 EVALUATION_PATH = "/tmp/ldnet/evaluation"
@@ -90,7 +92,12 @@ def evaluate(num_class, images_placeholder_tensor):
                                             name='ImagesPlaceholder')
 
     # the size of logits: [batch_size, 3]
-    logits = stp4_ldnet.ldnet(inputs=images_placeholder, num_classes=num_class, print_current_tensor=False)
+    # ldnet-v0
+    # logits = stp4_ldnet.ldnet(inputs=images_placeholder, num_classes=num_class, print_current_tensor=False)
+
+    # ldnet-v1
+    with arg_scope(stp4_ldnet_v1.ldnet_v1_arg_scope()):
+        logits = stp4_ldnet_v1.ldnet_v1(inputs=images_placeholder, num_classes=num_class, print_current_tensor=False)
 
     # the size of final_tensor: [batch_size, 3]
     final_tensor = tf.nn.softmax(logits, name="Prediction")
@@ -128,12 +135,15 @@ def show_lane(initial_image, final_tensor_value):
     # show initial image.
     # initial_image.show()
 
+    sess = tf.Session()
+
     position = 0  # lane's position
     target_cells_counter = 0  # lane's number.
     global_position = []
     for cell_prediction in final_tensor_value:
         position += 1
-        if (cell_prediction[1] >= 0.5) and (cell_prediction[2] < 0.5):
+        # if (cell_prediction[1] >= 0.5) and (cell_prediction[2] < 0.5):
+        if sess.run(tf.argmax(cell_prediction)) == 1:
             target_cells_counter += 1
             global_position.append(position + factor_for_w * factor_top_unused)
     print('global_position', global_position)
@@ -163,7 +173,7 @@ def show_lane(initial_image, final_tensor_value):
 
 
 def main(_):
-    initial_image, cells_batch_of_one_image = read_images_as_cells_batch("dir6_initial_imgs/f00030.png")
+    initial_image, cells_batch_of_one_image = read_images_as_cells_batch("dir6_initial_imgs/washington1/f00320.png")
     final_tensor_value = evaluate(num_class=NUM_CLASS, images_placeholder_tensor=cells_batch_of_one_image)
     show_lane(initial_image=initial_image, final_tensor_value=final_tensor_value)
 
