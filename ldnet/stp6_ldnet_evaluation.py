@@ -50,11 +50,16 @@ def read_images_as_cells_batch(images_path):
             row_end = cell_height * hh + cell_height
             column_start = cell_width * ww
             column_end = cell_width * ww + cell_width
-            cell = array_image[row_start:row_end, column_start:column_end]
+            cell = array_image[row_start:row_end, column_start:column_end, :]
+
+            # if hh == 6 and ww == 3:
+            #     img = Image.fromarray(cell)
+            #     img.show()
+
             cell = tf.image.resize_images(cell, (images_size[0], images_size[1]))
             cells_batch_of_one_image.append(cell)
 
-    # print(cells_batch_of_one_image)
+    print(cells_batch_of_one_image)
     cells_batch_of_one_image = tf.reshape(cells_batch_of_one_image,
                                           [-1, images_size[0], images_size[1], images_size[2]])
     print(cells_batch_of_one_image)
@@ -120,8 +125,8 @@ def evaluate(num_class, images_placeholder_tensor):
             # print(global_step)
 
             final_tensor_value = sess.run(final_tensor, feed_dict={images_placeholder: images_placeholder_value})
-            # print(final_tensor_value)
-            # print(final_tensor_value.shape)
+            print(final_tensor_value)
+            print(final_tensor_value.shape)
 
         else:
             print('No checkpoint file found')
@@ -142,16 +147,26 @@ def show_lane(initial_image, final_tensor_value):
     global_position = []
     for cell_prediction in final_tensor_value:
         position += 1
-        # if (cell_prediction[1] >= 0.5) and (cell_prediction[2] < 0.5):
-        if sess.run(tf.argmax(cell_prediction)) == 1:
-            target_cells_counter += 1
-            global_position.append(position + factor_for_w * factor_top_unused)
+        if sess.run(tf.argmin(cell_prediction)) == 2:
+            if (cell_prediction[0] == 1.0) and (cell_prediction[1] < 0.000001):
+                # if sess.run(tf.argmax(cell_prediction)) == 0:
+                target_cells_counter += 1
+                global_position.append(position + factor_for_w * factor_top_unused)
     print('global_position', global_position)
     print('target_cells_counter', target_cells_counter)
 
     # the cells' global xy positions.
-    global_row = [x // factor_for_w for x in global_position]
-    global_column = [x % factor_for_w for x in global_position]
+    # global_row = [x // factor_for_w for x in global_position]
+    # global_column = [x % factor_for_w - 1 for x in global_position]
+    global_row = []
+    global_column = []
+    for x in global_position:
+        if x % factor_for_w == 0:
+            global_row.append(x // factor_for_w - 1)
+            global_column.append(factor_for_w - 1)
+        else:
+            global_row.append(x // factor_for_w)
+            global_column.append(x % factor_for_w - 1)
     print('global_row', global_row)
     print('global_column', global_column)
 
@@ -161,10 +176,10 @@ def show_lane(initial_image, final_tensor_value):
     cell_width = initial_image.width // factor_for_w  # the width of cells
     cell_height = initial_image.height // factor_for_h  # the height of cells
     for i in range(target_cells_counter):
-        x1_left_margin = cell_width * (global_column[i] - 1)
-        x1_top_margin = cell_height * (global_row[i] - 1)
-        x2_left_margin = cell_width * global_column[i]
-        x2_top_margin = cell_height * global_row[i]
+        x1_left_margin = cell_width * (global_column[i])
+        x1_top_margin = cell_height * (global_row[i])
+        x2_left_margin = cell_width * (global_column[i] + 1)
+        x2_top_margin = cell_height * (global_row[i] + 1)
         draw_mask.rectangle(xy=(x1_left_margin, x1_top_margin, x2_left_margin, x2_top_margin), fill=(0, 255, 0))
 
     # merge two images using blend, and show target cells in initial image.
